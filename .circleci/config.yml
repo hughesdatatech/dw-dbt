@@ -34,10 +34,10 @@ commands: #-co
           command: cd dw && dbt deps
       - run:
           name: Run dbt parse
-          #command: cd dw && dbt parse <<parameters.compile-params>>
+          command: cd dw && dbt parse <<parameters.compile-params>>
       - run:
           name: Run dbt compile
-          #command: cd dw && dbt compile <<parameters.compile-params>>
+          command: cd dw && dbt compile <<parameters.compile-params>>
   build-co:
     parameters:
       build-params:
