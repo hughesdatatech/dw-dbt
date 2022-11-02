@@ -29,16 +29,15 @@ commands: #-co
             mkdir -p ~/.dbt
             mv .circleci/profiles.yml ~/.dbt/profiles.yml
             cat  ~/.dbt/profiles.yml
-            sed -i -e "s/ARC_PASSWORD/${ARC_PASSWORD}/g" ~/.dbt/profiles.yml
       - run:
           name: Run dbt deps
-          command: cd talkspace && dbt deps
+          command: cd dw && dbt deps
       - run:
           name: Run dbt parse
-          command: cd talkspace && dbt parse <<parameters.compile-params>>
+          #command: cd dw && dbt parse <<parameters.compile-params>>
       - run:
           name: Run dbt compile
-          command: cd talkspace && dbt compile <<parameters.compile-params>>
+          #command: cd dw && dbt compile <<parameters.compile-params>>
   build-co:
     parameters:
       build-params:
@@ -48,12 +47,12 @@ commands: #-co
     steps:
       - run:
           name: Run dbt build
-          command: cd talkspace && dbt build <<parameters.build-params>>
+          command: cd dw && dbt build <<parameters.build-params>>
 
 jobs:
-  build:
+  setup-and-compile-jb:
     docker:
       - image: cimg/python:3.10.8
     steps:
-      - checkout
-      - run: python --version
+      - setup-and-compile-co:
+          compile-params: ""
