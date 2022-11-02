@@ -35,6 +35,7 @@ commands: #-co
           name: Run dbt deps
           command: |
             echo $PATH$
+             chmod -R 777
             ls -la /usr/local/bin
           #command: cd dw && dbt deps
       #- run:
