@@ -32,7 +32,7 @@ commands: #-co
       - run:
           name: Run dbt deps
           command: |
-            cd dw
+            cd dw && dbt deps
             pwd
             echo "$PATH"
           #command: cd dw && dbt deps
