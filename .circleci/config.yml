@@ -32,6 +32,9 @@ jobs:
       - checkout
       - run:
           command: |
+            mkdir -p ~/.dbt
+            mv .circleci/profiles.yml ~/.dbt/profiles.yml 
+            cat  ~/.dbt/profiles.yml
             mv .circleci/requirements.txt  ~/.dbt/requirements.txt
       - python/install-packages:
           pkg-manager: pip
@@ -40,8 +43,4 @@ jobs:
       - run:
           name: Run tests
           # This assumes pytest is installed via the install-package step above
-          command: |
-            mkdir -p ~/.dbt
-            mv .circleci/profiles.yml ~/.dbt/profiles.yml 
-            cat  ~/.dbt/profiles.yml
-          #command: pytest
+          command: pytest
