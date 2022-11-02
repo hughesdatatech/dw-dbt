@@ -37,7 +37,8 @@ jobs:
             mkdir -p ~/.dbt
             mv .circleci/profiles.yml ~/.dbt/profiles.yml 
             cat  ~/.dbt/profiles.yml
-            mv .circleci/requirements.txt  ~/.dbt/requirements.txt            
+            mv .circleci/requirements.txt  ~/.dbt/requirements.txt
+            pipx install "meltano"            
       - python/install-packages:
           pkg-manager: pip
           app-dir: ~/.dbt/  # If you're requirements.txt isn't in the root directory.
