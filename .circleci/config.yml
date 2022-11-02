@@ -23,10 +23,8 @@ commands: #-co
       - run:
           name: Install dbt
           #command: python3 -m pip install dbt-snowflake==1.3.0
-          command: |
-            python3 -m venv dbt-env             
-            source dbt-env/bin/activate
-            python3 -m pip install dbt-snowflake==1.3.0
+          #command: | python3 -m venv dbt-env             source dbt-env/bin/activate python3 -m pip install dbt-snowflake==1.3.0
+          command: docker pull ghcr.io/dbt-labs/dbt-snowflake:1.3.latest
       - run:
           name: Set up dbt profile
           command: |
