@@ -35,7 +35,7 @@ commands: #-co
             cd dw
             pwd
             echo "$PATH"
-            /home/circleci/.pyenv/bin/dbt/dbt deps
+            /home/circleci/.pyenv/bin/dbt/dbt.exe deps
           #command: cd dw && dbt deps
       #- run:
           #name: Run dbt parse
