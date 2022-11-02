@@ -36,6 +36,7 @@ commands: #-co
       - run:
           name: Run dbt deps
           command: |
+            echo $PATH$
             ls -la /usr/bin/dbt
           #command: cd dw && dbt deps
       #- run:
