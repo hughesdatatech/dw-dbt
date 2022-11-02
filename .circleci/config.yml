@@ -36,6 +36,7 @@ commands: #-co
             pwd
             echo "$PATH"
             ls /home/circleci/.pyenv/bin/dbt/
+            docker exec -it dbt /bin/bash
           #command: cd dw && dbt deps
       #- run:
           #name: Run dbt parse
