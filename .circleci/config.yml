@@ -27,7 +27,6 @@ commands: #-co
             python3 -m venv dbt-env             
             source dbt-env/bin/activate
             python3 -m pip install dbt-snowflake==1.3.0
-            sudo ln -s /usr/local/bin/dbt /usr/bin/dbt         
       - run:
           name: Set up dbt profile
           command: |
@@ -37,8 +36,7 @@ commands: #-co
       - run:
           name: Run dbt deps
           command: |
-            sudo circleci /usr/bin/dbt deps
-            pip show dbt
+            ls -la /usr/bin/dbt
           #command: cd dw && dbt deps
       #- run:
           #name: Run dbt parse
