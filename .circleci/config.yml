@@ -32,9 +32,7 @@ commands: #-co
       - run:
           name: Run dbt deps
           command: |
-            cd dw && dbt deps
-            pwd
-            echo "$PATH"
+            pip show dbt
           #command: cd dw && dbt deps
       #- run:
           #name: Run dbt parse
