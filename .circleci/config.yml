@@ -35,6 +35,7 @@ commands: #-co
           name: Run dbt deps
           command: |
             echo $PATH$
+            ls -la /home/circleci/.pyenv/bin
             ls -la /usr/bin/dbt
           #command: cd dw && dbt deps
       #- run:
