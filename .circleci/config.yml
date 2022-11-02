@@ -31,7 +31,10 @@ commands: #-co
             cat  ~/.dbt/profiles.yml
       - run:
           name: Run dbt deps
-          command: cd dw && pwd
+          command: |
+            cd dw
+            pwd
+            echo "$PATH"
           #command: cd dw && dbt deps
       #- run:
           #name: Run dbt parse
