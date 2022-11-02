@@ -1,1 +1,2 @@
 pytest
+dbt-snowflake==1.3.0
