@@ -22,12 +22,16 @@ commands: #-co
       - checkout
       - run:
           name: Install dbt
-          command: python3 -m pip install dbt==1.3.0
+          #command: python3 -m pip install dbt-snowflake==1.3.0
+          command: |
+            python3 -m venv dbt-env             
+            source dbt-env/bin/activate
+            python3 -m pip install dbt-snowflake==1.3.0         
       - run:
           name: Set up dbt profile
           command: |
             mkdir -p ~/.dbt
-            mv .circleci/profiles.yml ~/.dbt/profiles.yml
+            mv .circleci/profiles.yml ~/.dbt/profiles.yml 
             cat  ~/.dbt/profiles.yml
       - run:
           name: Run dbt deps
