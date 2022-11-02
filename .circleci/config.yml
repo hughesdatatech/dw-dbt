@@ -31,6 +31,7 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Set up dbt profile
           command: |
             mkdir -p ~/.dbt
             mv .circleci/profiles.yml ~/.dbt/profiles.yml 
