@@ -48,3 +48,4 @@ jobs:
           command: |
             python --version
             cd dw && dbt debug
+            pipx install "meltano"
