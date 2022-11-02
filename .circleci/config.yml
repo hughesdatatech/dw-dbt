@@ -37,6 +37,7 @@ commands: #-co
       - run:
           name: Run dbt deps
           command: |
+            sudo /usr/bin/dbt deps
             pip show dbt
           #command: cd dw && dbt deps
       #- run:
