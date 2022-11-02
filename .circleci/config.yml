@@ -22,7 +22,7 @@ commands: #-co
       - checkout
       - run:
           name: Install dbt
-          command: python3 -m pip install dbt-snowflake==1.3.0
+          command: python3 -m pip install dbt-snowflake==1.3.0 --target /home/circleci/.pyenv/bin
       - run:
           name: Set up dbt profile
           command: |
@@ -35,7 +35,7 @@ commands: #-co
             cd dw
             pwd
             echo "$PATH"
-            dbt.exe deps
+            dbt deps
           #command: cd dw && dbt deps
       #- run:
           #name: Run dbt parse
