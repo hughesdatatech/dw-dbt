@@ -32,7 +32,6 @@ jobs:
       - checkout
       - run:
           command: |
-            chown -R $USER:$USER /
             mv .circleci/requirements.txt  ~/.dbt/requirements.txt
       - python/install-packages:
           pkg-manager: pip
