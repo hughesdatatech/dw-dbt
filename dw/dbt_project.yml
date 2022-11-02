@@ -1,0 +1,566 @@
+name: "dw"
+version: "1.0.0"
+require-dbt-version: "=1.3.0"
+config-version: 2
+
+# The profile dbt uses for this project.
+profile: "dw"
+
+# Where dbt should look for different types of files.
+# The `model-paths` config, for example, states that models in this project can be
+# found in the "models/" directory.
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+tests:
+  +severity: warn  # Default to warn for all tests.
+
+target-path: "target" # Directory which will store compiled SQL files.
+clean-targets: # Directories to be removed by `dbt clean`.
+  - "target"
+  - "dbt_packages"
+
+on-run-start: "{{ process_log_handler(component='job', job_step='on-run-start') }}"
+on-run-end: "{{ process_log_handler(component='job', job_step='on-run-end') }}"
+
+# Full documentation: https://docs.getdbt.com/docs/configuring-models
+models:
+  +pre-hook:
+    sql: "{{ process_log_handler(component='model', job_step='pre-hook') }}"
+    transaction: false
+  +post-hook:
+    sql: "{{ process_log_handler(component='model', job_step='post-hook') }}"
+    transaction: false
+  talkspace:
+    +bind: false # Late-binding views so DMS can drop and recreate underlying tables.
+    1_staging:
+      +materialized: table
+      stripe:
+        stripe_mobile:
+      talkspace_app:
+        talktala_production:
+      talkspace_claims:
+        claims:
+    3_business_rule:
+      +materialized: view
+    4_info_mart:
+      +materialized: table
+      financial_billing:
+        +materialized: view
+        current:
+          +materialized: table
+        historical:
+          +materialized: incremental
+        point_in_time:
+          +tags: pit
+          +materialized: incremental
+      financial_transaction:
+        +materialized: view
+        current:
+          +materialized: table
+        historical:
+          +materialized: incremental
+        point_in_time:
+          +tags: pit
+          +materialized: incremental
+      session:
+        +materialized: view
+        current:
+          +materialized: table
+        historical:
+          +materialized: incremental
+        point_in_time:
+          +tags: pit
+          +materialized: incremental
+      claim:
+        +materialized: view
+        current:
+          +materialized: table
+        historical:
+          +materialized: incremental
+        point_in_time:
+          +tags: pit
+          +materialized: incremental
+      user:
+        +materialized: table
+    5_metrics_rule:
+      +materialized: view
+    6_metrics_mart:
+      financial_transaction:
+        +materialized: view
+        current:
+          +materialized: table
+        historical:
+          +materialized: incremental
+        point_in_time:
+          +tags: pit
+          +materialized: incremental
+    utilities:
+        +materialized: view
+        process_log_key_status_tracking:
+          +materialized: incremental
+        process_log_stg_rv_all_test:
+          +materialized: incremental
+          +tags: stg_rv_all_test
+          transient_test:
+            +materialized: ephemeral
+
+snapshots:
+  +pre-hook:
+    sql: "{{ process_log_handler(component='snapshot', job_step='pre-hook') }}"
+    transaction: false
+  +post-hook:
+    sql: "{{ process_log_handler(component='snapshot', job_step='post-hook') }}"
+    transaction: false
+  talkspace:
+    2_raw_vault:
+      +tags: 
+        - raw_vault
+
+vars:
+  "dbt_date:time_zone": "UTC"
+
+  room_statuses:
+    1: paying
+    3: expired
+    4: expired
+    5: free_consultation
+    6: not_renewing
+    7: canceled
+    9: full_lock
+    10: trial
+    11: past_due
+    12: blur_lock
+    13: freeze
+    14: free_trial
+    15: no_match
+
+  survey_types:
+    1: outcome_measures
+    2: working_alliance_inventory
+    3: workplace_outcome_assessment
+    4: work_limitations_questionnaire
+    5: psychographic_assessment
+
+  test_user_emails:
+    - test.com
+    - example.com
+    - talkspace.com
+    - talkspace.m8r.co
+    - mailinator.com
+    - mailiantor.com
+    - maillinator.com
+
+  user_types:
+    1: admin
+    2: client
+    3: provider
+
+  dim_date_valid_range:
+    1: '2000-01-01'
+    2: '2050-01-02'
+
+  max_effective_date: '9999-12-31 00:00:00'
+
+  # Set to a number > 0 to limit the number of rows returned in all staging models.
+  # dbt run --vars 'test_row_limit: 1' --select tag:staging
+  test_row_limit: 0
+
+  run_key: 0
+
+  clean_all_objects_key: '^^^talkspace34'
+
+  null_key_int: 'null'
+
+  null_key_char: 'null'
+
+  # Not currently used but can be used to make business keys unique if key integration is required.
+  collision_keys:
+    1: default
+    2: talkspace_app # Talkspace application / product
+    3: gedi # Gateway EDI
+    4: talkspace_claims # In-house developed Talkspace claims system
+    5: nppes # Issuer of NPIs, the National Plan and Provider Enumeration System
+    6: recurly # No longer used payment processor
+    7: stripe # Currently used payment processor
+
+  # Default values for DW metadata-related columns.
+  tenant_keys:
+    1: default
+
+  sanding_value: '||'
+
+  job_id_default: default
+
+  job_user_id_default: circleci
+
+  jira_task_key_default: default
+
+  extracted_at_default: _dms_replication_ts
+
+  loaded_at_default: sysdate
+
+  process_log: process_log
+
+  ########################################################################################################################
+  # Model configuration used internally by the DW.
+  # ALL source entitites require an entry here in the format schema_name__table_name (the key in the primary dictionary).
+  # Some keys in the secondary dictionary are required in certain cases and some are optional as noted below.
+  ########################################################################################################################
+  #
+  # Key:                    Values and Description
+  #
+  # track_key_deletes:      true | false
+  #                         Set to true if you anticipate data to be deleted from the source entity. 
+  #                         This will ensure that key deletes are tracked in the process_log_key_status_tracking table.
+  #                         Key is REQUIRED for ALL sources entities.
+  #
+  # unique_key:             List of columns that comprise the unique key of the source entity. 
+  #                         Key is REQUIRED for ALL sources entities.
+  #
+  # boolean_cols:           List of boolean columns in the source entity.
+  #                         Key is ONLY REQUIRED for data sources using the snapshot check strategy (stripe_mobile).
+  #                         If a stripe_mobile source entity has no booleans, this key does not need to be set.
+  #
+  # boolean_reserved_cols:  List of boolean columns that are also reserved Redshift words. 
+  #                         Key is ONLY REQUIRED for sources using the snapshot check strategy (stripe_mobile).
+  #                         If a stripe_mobile source entity has no boolean reserved words, this key does not need to be set.
+  #                         NB: A column should be listed in only one of boolean_cols or boolean_reserved_cols not both.
+  #                         i.e. the two lists are mutually exclusive.
+  #
+  # reserved_cols:          List of columns that are reserved Redshift words.
+  #                         Key is REQUIRED for ALL sources having columns with names that are Redshift reserved words.
+  #                         If a source entity has no reserved words, this key does not need to be set.
+  #                         NB: A column should be listed in only one of boolean_reserved_cols or reserved_cols not both.
+  #                         i.e. the two lists are mutually exclusive.
+  #
+  ########################################################################################################################
+
+  stg_claims__model_config:
+      claims__claims_data: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      claims__claims_eras: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      claims__claims_payments: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      claims__claims_submitted: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      claims__claims_transactions: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      claims__claims: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+
+  stg_talktala_production__model_config:
+      talktala_production__session_reports: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      talktala_production__insurance_payers: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      talktala_production__payment_transactions: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+
+  stg_payout__model_config: 
+      payout__private_talk_history_flat: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+
+  stg_stripe_mobile__model_config: 
+      stripe_mobile__balance_transaction_fee_details: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__balance_transactions: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__charge_groups: 
+        track_key_deletes: false 
+        unique_key: ['charge_id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__charges_metadata: 
+        track_key_deletes: true 
+        unique_key: ['charge_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__charges: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols: ['captured', 'card_default_for_currency', 'paid', 'refunded']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__coupons_metadata: 
+        track_key_deletes: true 
+        unique_key: ['coupon_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__coupons: 
+        track_key_deletes: true 
+        unique_key: ['id', 'created']
+        boolean_cols: ['valid']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__credit_note_line_item_tax_amounts: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols: ['inclusive']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__credit_note_line_items: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__credit_notes_metadata: 
+        track_key_deletes: true 
+        unique_key: ['credit_note_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__credit_notes: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__customers: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols: ['deleted', 'delinquent']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__disputes_metadata: 
+        track_key_deletes: true 
+        unique_key: ['dispute_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__disputes: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols: ['is_charge_refundable', 'evidence_details_has_evidence', 'evidence_details_past_due', 'network_details_visa_rapid_dispute_resolution']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__early_fraud_warnings: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols: ['actionable']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__exchange_rates_from_usd: 
+        track_key_deletes: false 
+        unique_key: ['date']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__invoice_items_metadata: 
+        track_key_deletes: true 
+        unique_key: ['invoice_item_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__invoice_items: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols: ['discountable', 'proration']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__invoice_line_items: 
+        track_key_deletes: false 
+        unique_key: ['invoice_id', 'source_id', 'plan_id']
+        boolean_cols: ['discountable', 'proration']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__invoices_metadata: 
+        track_key_deletes: true 
+        unique_key: ['invoice_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__invoices: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols: ['attempted', 'auto_advance', 'paid', 'paid_out_of_band'] 
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__payment_intents_metadata: 
+        track_key_deletes: true 
+        unique_key: ['payment_intent_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__payment_intents: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__payment_reviews: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols: ['open']
+      stripe_mobile__plans_metadata: 
+        track_key_deletes: true 
+        unique_key: ['plan_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__plans: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols: ['interval']
+        boolean_reserved_cols:
+      stripe_mobile__prices_metadata: 
+        track_key_deletes: true 
+        unique_key: ['price_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__prices: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__products_metadata: 
+        track_key_deletes: true 
+        unique_key: ['product_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__products: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols: ['active', 'shippable']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__refunds_metadata: 
+        track_key_deletes: true 
+        unique_key: ['refund_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__refunds: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__rule_decisions: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols: ['rule_override_by_allow_rule']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__subscription_items: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__subscriptions_metadata: 
+        track_key_deletes: true 
+        unique_key: ['subscription_id', 'key']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__subscriptions: 
+        track_key_deletes: true 
+        unique_key: ['id']
+        boolean_cols: ['cancel_at_period_end', 'billing_thresholds_reset_billing_cycle_anchor']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__tax_rates: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols: ['active', 'inclusive']
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__transfer_reversals: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols:
+        reserved_cols:
+        boolean_reserved_cols:
+      stripe_mobile__transfers: 
+        track_key_deletes: false 
+        unique_key: ['id']
+        boolean_cols: ['automatic', 'reversed']
+        reserved_cols:
+        boolean_reserved_cols:
+
+  # Schema configuration used internally by the DW.
+  stg_schema_config:
+      stripe_mobile:
+        snapshot_strategy: check
+        snapshot_updated_at_col: 
+        staging_model_default_exception_cols: 
+        staging_model_order_by_cols: ['1 desc']
+      talktala_production:
+        snapshot_strategy: timestamp
+        snapshot_updated_at_col: _dms_cdc_ts
+        staging_model_default_exception_cols: ['_dms_operation']
+        staging_model_order_by_cols: ['_dms_cdc_ts desc','_dms_replication_ts desc']
+      claims:
+        snapshot_strategy: timestamp
+        snapshot_updated_at_col: _dms_cdc_ts
+        staging_model_default_exception_cols: ['_dms_operation']
+        staging_model_order_by_cols: ['_dms_cdc_ts desc','_dms_replication_ts desc']
+      payout:
+        snapshot_strategy: timestamp
+        snapshot_updated_at_col: _dms_cdc_ts
+        staging_model_default_exception_cols: ['_dms_operation']
+        staging_model_order_by_cols: ['_dms_cdc_ts desc','_dms_replication_ts desc']

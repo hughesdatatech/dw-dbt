@@ -1,0 +1,29 @@
+version: 2
+
+macros:
+  - name: equal_column_counts
+    description: >
+      Compares column counts between two relations and fails if the counts are not equal.
+      Primarily intended to compare staging tables to source tables.
+      Adapted from the expect_table_column_count_to_equal_other_table test in dbt_expectations.
+    arguments:
+      - name: model
+        type: Relation
+        description: The model to test
+      - name: compare_model
+        type: Relation
+        description: The model to which to compare the column counts.
+      - name: exclude_meta_columns
+        type: bool
+        description: >
+          Whether to exclude any _dms_ or dw metadata columns from the comparison.
+
+  - name: process_log_load_succeeded
+    description: >
+      Checks that there are no non-zero values in a column for the most recent run of
+      a process log model.
+
+  - name: monthly_snapshot_has_run
+    description: >
+      Checks to see if a monthly snapshot for a given model has already been run.
+      Used as an extreme safety check in situations where we want to limit the snapshot to exactly one run per month.

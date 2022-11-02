@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  ### user models
+  - name: br_talktala_production_users
+    description: User-level table containing client, provider, and admin data.
+  - name: br_test_users_to_exclude
+    description: Table containing the test user ids. Table to be used to in other models to filter out test records.
+  - name: br_client
+    description: User-level table containing client data. Excludes test records.
+  - name: br_provider
+    description: User-level table containing provider data. Excludes test records.
+  - name: br_admin
+    description: User-level table containing admin data. Excludes test records.
+
+  ### room models
+  - name: br_talktala_production_private_talks
+    description: The base table for private_talks, aka rooms, which represent client
+                 accounts and are where therapy/psychiatry service takes place.
+                 Excludes test records.
+  - name: br_talktala_production_first_purchase
+    description: Contains records of each room's first conversion
+                 (whether first purchase or first B2B voucher claim) at Talkspace.
+                 Excludes test records.
+  - name: br_room
+    description: The business-rule table for rooms. Combines private_talks and first_purchase models.
+
+  ### plan models
+  - name: br_talktala_production_plan
+    description: Plans determine the service that a Talkspace client receives in their room(s).
+  - name: br_talktala_production_plan_details
+    description: Plan details is 1:1 with plan. It includes important metadata about plans.
+  - name: br_talktala_production_auto_cancellation_settings
+    description: Details the auto-cancellation policies for some (usually B2B) plans.
+  - name: br_talktala_production_plan_credit_settings
+    description: Details the number of live credits that plans automatically include. Does not have a row for all plans.
+  - name: br_talktala_production_plan_to_plan_group
+    description: Maps plans to plan groups, which determine access to specific groups of providers.
+  - name: br_plan
+    description: Details all of the Talkspace plans. Combination of the plan-related tables.
+
+  ### payment_type models
+  - name: br_talktala_production_plan_type_payment_type_mapping
+    description: Maps plans to payment types. Multiple payment types may correspond to a single plan.
+  - name: br_talktala_production_payment_types
+    description: Details the different payment types, which are payment-processor-specific aliases for plans.
+  - name: br_talktala_production_payment_type_policies
+    description: Contains information about each payment type's policy and some specific functionalities.
+  - name: br_payment_type
+    description: Details all of the payment types. Combination of the payment type tables.

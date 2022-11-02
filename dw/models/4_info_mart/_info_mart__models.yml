@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: im_claim
+  - name: im_claim_hist
+  - name: im_claim_pit
+  - name: vim_claim
+
+  - name: im_invoice_item_pivot
+  - name: im_invoice_item_pivot_hist
+  - name: im_invoice_item_pivot_pit
+  - name: vim_invoice_item_pivot
+
+  - name: im_invoice_item
+  - name: im_invoice_item_hist
+  - name: im_invoice_item_pit
+  - name: vim_invoice_item
+
+  - name: im_invoice_metadata_pivot
+  - name: im_invoice_metadata_pivot_hist
+  - name: im_invoice_metadata_pivot_pit
+  - name: vim_invoice_metadata_pivot
+
+  - name: im_invoice
+  - name: im_invoice_hist
+  - name: im_invoice_pit
+  - name: vim_invoice
+
+  - name: im_subscription
+  - name: im_subscription_hist
+  - name: im_subscription_pit
+  - name: vim_subscription
+
+  - name: im_balance_transaction
+  - name: im_balance_transaction_hist
+  - name: im_balance_transaction_pit
+  - name: vim_balance_transaction
+
+  - name: im_charge
+  - name: im_charge_hist
+  - name: im_charge_pit
+  - name: vim_charge
+
+  - name: im_dispute
+  - name: im_dispute_hist
+  - name: im_dispute_pit
+  - name: vim_dispute
+
+  - name: im_refund
+  - name: im_refund_hist
+  - name: im_refund_pit
+  - name: vim_refund
+
+  - name: im_session_report
+  - name: im_session_report_hist
+  - name: im_session_report_pit
+  - name: vim_session_report
+  - name: vim_session_report_hist
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('stg_talktala_production__session_reports')
+          where: is_current_record
+    columns:
+      - name: session_report_id
+        tests:
+          - unique:
+              where: is_current_record
+
+  - name: im_client
+  - name: im_provider
+  - name: im_admin
+  - name: im_room
+  - name: im_plan
+  - name: im_payment_type
+  - name: im_partner

@@ -1,0 +1,306 @@
+version: 2
+
+macros:
+  - name: build_staging_model
+    description: >
+      Build a staging model by selecting all columns from a source table,
+      adding metadata columns and deduping.
+    arguments:
+      - name: source_schema
+        type: string
+        description: Schema name of the source table being loaded from.
+      - name: source_table
+        type: string
+        description: Name of the source table being loaded from.
+      - name: unique_key
+        type: string
+        description: Name of the unique key field in the source table being loaded from.
+
+  - name: enum_to_case_stmt
+    description: Returns a case statement to convert enum IDs to names
+    arguments:
+      - name: column_name
+        type: string
+        description: The name of the column containing the enum IDs
+      - name: enum_map
+        type: dict
+        description: A map of enum IDs to names
+      - name: else_value
+        type: string
+        description: The value to use in the else clause. Defaults to null.
+
+  - name: wrap_in_quotes
+    description: Wraps a string in quotes
+    arguments:
+      - name: str_to_quote
+        type: string
+        description: The string to wrap with quotes
+
+  - name: build_extracted_at
+    description: >
+          NB: This macro is primarily intended for internal use by the build_dw_metadata_cols macro. Therefore it will most likely not need to be called directly when building new models.
+          Applied date/time is the date/time when a record was extracted from its source.
+          Macro builds the standard extracted_at metadata column.
+    arguments:
+      - name: column
+        type: string
+        description: Name of the source column to use as the applied date/time. If applied date/time is not provided by the source, no value should be passed in which case load date/time will be used as the applied date/time.
+      - name: alias
+        type: string
+        description: Name to use as an alias for the column. Defaults to extracted_at. In reality this value should never be overriden.
+
+  - name: build_hash_diff
+    description: >
+          Hash diffs are used to make it easier to detect and track column value changes. Instead of comparing column by column, a hash is created over all the columns
+          that might change, and then the hash is compared from one load to the next. This is faster than comparing column by column because the hash diff value will always the same length,
+          e.g. 32 or 64 bytes, etc. depending on the hash algorithm used. Macro takes a list of columns and applies standard hash diff treatments to each one (i.e. convert value to varchar, trim value, replace null value with blank).
+          All columns are delimited by a sanding value (default sanding value is ||).
+          NB: This macro does NOT actually hash and create the final value. Hashing is accomplished by passing the hash diff to a separate hash macro (see build_hash_value macro).
+    arguments:
+      - name: column_map
+        type: list
+        description: List of columns to treat and sand.
+      - name: additional_cols
+        type: list
+        description: >
+          List of additional columns to treat and sand after the first list is processed.
+          This is needed to handle a special case with Redshift boolean values since they cannot directly be cast to varchar.
+  
+  - name: build_jira_task_key
+    description: >
+          NB: This macro is primarily intended for internal use by the build_dw_metadata_cols macro. Therefore it will most likely not need to be called directly when building new models.
+          Jira task key is the key (or code) of the Jira ticket linked to a record in a table.
+          Macro builds the standard jira_task_key metadata column.
+    arguments:
+      - name: task_key
+        type: string
+        description: Key (or code) of the Jira ticket to link to the record. Defaults to 'default'.
+      - name: alias
+        type: string
+        description: Name to use as an alias for the column. Defaults to jira_task_key. In reality this value should never be overriden.
+
+  - name: build_job_id
+    description: >
+          NB: This macro is primarily intended for internal use by the build_dw_metadata_cols macro. Therefore it will most likely not need to be called directly when building new models.
+          Job id is the unique identifier of the job that loaded a record to a table.
+          Macro builds the standard job_id metadata column.
+    arguments:
+      - name: job_id
+        type: string
+        description: >
+          Unique identifer of the job that loaded the record. Defaults to 'default'.
+          NB: The dbt invocation_id should always be passed as the value to this macro, unless there is some other circumstance that warrants using a different job id.
+      - name: alias
+        type: string
+        description: Name to use as an alias for the column. Defaults to job_id. In reality this value should never be overriden.
+
+  - name: build_loaded_at
+    description: >
+          NB: This macro is primarily intended for internal use by the build_dw_metadata_cols macro. Therefore it will most likely not need to be called directly when building new models.
+          Load date/time is the date/time a record was loaded to a table.
+          Macro builds the standard loaded_at metadata column.
+    arguments:
+      - name: value
+        type: string
+        description: Date/time the record was loaded. Defaults to sysdate. In reality this value should never be overriden.
+      - name: alias
+        type: string
+        description: Name to use as an alias for the column. Defaults to loaded_at. In reality this value should never be overriden.
+
+  - name: build_rec_source
+    description: >
+          NB: This macro is primarily intended for internal use by the build_dw_metadata_cols macro. Therefore it will most likely not need to be called directly when building new models.
+          Record source is the source table (in theory it could be a file name) from which a record was loaded to a table.
+          Macro builds the standard rec_source metadata column.
+          NB: This macro relies on the dbt sources file to build the record source value.
+    arguments:
+      - name: schema_name
+        type: string
+        description: Schema name in the sources file we are loading data from.
+      - name: table_name
+        type: string
+        description: Table name under the schema in the sources file we are loading data from.
+      - name: alias
+        type: string
+        description: Name to use as an alias for the column. Defaults to rec_source. In reality this value should never be overriden.
+
+  - name: build_tenant_key
+    description: >
+          NB: This macro is primarily intended for internal use by the build_dw_metadata_cols macro. Therefore it will most likely not need to be called directly when building new models.
+          Tenant key can be used where there's a requirement for data to be partitioned by tenant (e.g. if you needed to support multiple clients).
+          Macro builds the standard tenant_key metadata column.
+    arguments:
+      - name: tenant_key
+        type: string
+        description: Defaults to nothing which results in a value of 'default' being used. Note that multi-tenancy is currently not needed, so in reality this value should not need to be overriden.
+      - name: alias
+        type: string
+        description: Name to use as an alias for the column. Defaults to tenant_key. In reality this value should never be overriden.
+
+  - name: build_job_user_id
+    description: >
+          NB: This macro is primarily intended for internal use by the build_dw_metadata_cols macro. Therefore it will most likely not need to be called directly when building new models.
+          User id is the system user id (or user name) used to run the job that loaded a record to a table.
+          Macro builds the standard job_user_id metadata column.
+    arguments:
+      - name: job_user_id
+        type: string
+        description: The system user id that loaded the record. Defaults to 'circleci'.
+      - name: alias
+        type: string
+        description: Name to use as an alias for the column. Defaults to job_user_id. In reality this value should never be overriden.
+
+  - name: build_hash_value
+    description: >
+          Macro applies the sha2 hash function with 256 bits to an input value or column, and returns a varbyte of length 64. 
+          NB: See build_hash_diff macro for more details on the purpose of hashing.
+    arguments:
+      - name: value
+        type: string
+        description: The value (or column name) to hash.
+      - name: alias
+        type: string
+        description: Name to use as an alias for the hashed value. If no alias is supplied, then no alias is used.
+
+  - name: treat_char_attribute
+    description: >
+          So called "hard" rules can be applied to incoming staged data to ensure all data are successfully loaded.
+          These rules do not alter the meaning of any of the content being loaded. Trimming leading and trailing spaces, removing invalid or control characters that might result
+          in failures, peforming data type conversions, etc. are all examples of hard rules that can be applied in the staging layer models to prepare the data for loading.
+          Macro takes an input column (of character data type) and applies hard rules.
+          NB: The only rule we have implemented is to trim leading and trailing spaces. Other hard rules will be implemented as required.
+    arguments:
+      - name: attribute
+        type: str
+        description: Name of the character column to apply treatments to.
+
+  - name: treat_char_pii_attribute
+    description: >
+          Macro to treat character pii data.
+          NB: This macro is a placeholder for future use.
+    arguments:
+      - name: attribute
+        type: str
+        description: Name of the character column to apply treatments to.
+
+  - name: treat_num_pii_attribute
+    description: >
+          Macro to treat numeric pii data.
+          NB: This macro is a placeholder for future use.
+    arguments:
+      - name: attribute
+        type: int
+        description: Name of the numeric column to apply treatments to.
+
+  - name: remove_double_quotes
+    description: Replaces double quotes with empty string.
+    arguments:
+      - name: value
+        type: str
+        description: String value to remove double quotes from.
+
+  - name: remove_single_quotes
+    description: Replaces single quotes with empty string.
+    arguments:
+      - name: value
+        type: str
+        description: String value to remove single quotes from.
+
+  - name: build_dw_metadata_cols
+    description: >
+          Macro builds all of the standard metadata columns used for tracking and auditing purposes.
+          It's provided as a convenience so that you don't have to type out each column when a new a new model is created, and to ensure consistency with naming.
+          Should be used in all staging models at a minimum. Using it in other models is optional.
+    arguments:
+      - name: source_schema
+        type: string
+        description: >
+              Schema name of the source table being loaded from.
+              NB: Should be used when the source of a model is defined in a sources.yml file.
+      - name: source_table
+        type: string
+        description: >
+              Name of the source table being loaded from.
+              NB: Should be used when the source of a model is defined in a sources.yml file.
+      - name: unique_key
+        type: string or list
+        description: >
+              Name of the unique key field in the source table being loaded from, or a list of names of the fields that comprises the unique key (i.e. a composite key)
+      - name: extracted_at_column
+        type: string
+        description: >
+              Name of the field to use as the applied date/time in the source table being loaded from.
+              If applied date/time is not provided by the source, a value for this argument should not be passed and loaded_at will be used instead.
+      - name: collision_key
+        type: string
+        description: >
+              NB: This is reserved for future use.
+      - name: build_hd
+        type: boolean
+        description: >
+              Boolean indicating whether or not a hash diff should be created. If true, then the following need to be considered:
+              1 - If the source_schema and source_table parameters are passed, the hash diff is created using all columns (by default) represented by that source (defined in sources.yml)
+                  hd_except_cols (see below) can be used to exclude a list of columns from the hash diff creation.
+                  hd_additional_cols (see below) can be used to pass a list of booleans to be included in the hash diff that have been pre-converted
+                  to smallint in order to handle the inability of Redshift being able to directly convert a boolean to a varchar.
+              2 - If the rec_source parameter is passed, it should be a reference to a model (i.e. pass in ref('model_name')), and the hash diff is created using all columns (by default) in the referenced model.
+                  hd_except_cols and hd_additional_cols can be used the same way as described above.
+      - name: hd_except_cols
+        type: list
+        description: >
+              As noted, if a hash diff is being created, this is list of columns to exclude from the hash diff calculation.
+      - name: hd_additional_cols
+        type: list
+        description: >
+              As noted, if a hash diff is being created, this is an extra list of columns to include in the hash diff calculation.
+              The only reason this should be used is for a list of booleans that have been pre-converted to smallint in order to handle the Redshift issue noted above.
+      - name: jira_task_key_column
+        type: string
+        description: >
+              The name of a column to use containing the value a jira task, to be used for tracking and auditing purposes if desired.
+              If not supplied then 'default' is used.
+
+  - name: select_dw_metadata_cols
+    description: >
+          Macro builds the names of the standard dw metadata columns for your select statement.
+          It's provided as a convenience so that you don't have to type out each column when a new br model is created.
+          Should be used in downstream br models that are selecting from a staging model.
+    arguments:
+      - name: alias
+        type: string
+        description: Alias of the table the metadata columns are being selected from. If an alias is not used, a value for this argument should not be passed.
+
+  - name: stg_rv_dupe_test
+    description: Check for duplicate records loaded from staging to a target.
+    arguments:
+      - name: tgt_table_name
+        type: str
+        description: Name of the target table to check for dupes.
+      - name: stg_table_name
+        type: str
+        description: Name of the staging table the target is being loaded from.
+      - name: cols_for_uniqueness
+        type: list
+        description: List of columns that constitute a unique record, e.g. ['id'].
+      - name: test_number
+        type: int
+        description: Loop number passed in by the calling model to ensure that all ctes are uniquely named.
+
+  - name: stg_rv_recon_test
+    description: Reconciliation check to ensure staged records have been loaded to their target (if they have not already been loaded).
+    arguments:
+      - name: stg_table_name
+        type: str
+        description: Name of the staging table the target is being loaded from.
+      - name: tgt_table_name
+        type: str
+        description: Name of the target table to check.
+      - name: cols_for_uniqueness
+        type: list
+        description: List of columns that constitute a unique record, e.g. ['id'].
+      - name: strategy
+        type: string
+        description: Snapshot strategy used by the target table.
+      - name: test_number
+        type: int
+        description: Loop number passed in by the calling model to ensure that all ctes are uniquely named.

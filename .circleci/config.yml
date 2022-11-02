@@ -1,26 +1,59 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
-jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+orbs:
+  slack: circleci/slack@4.10.1
+
+parameters: #-pp
+  manual-trigger-pp:
+    type: string
+    default: ""
+  dbt-vars:
+    type: string
+    default: "--vars 'test_row_limit: 10'"
+
+commands: #-co
+  setup-and-compile-co:
+    parameters:
+      compile-params:
+        description: Optional arguments to be passed to the dbt compile command
+        default: ""
+        type: string
     steps:
       - checkout
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: Install dbt
+          command: python3 -m pip install dbt-redshift==1.3.0
+      - run:
+          name: Set up dbt profile
+          command: |
+            mkdir -p ~/.dbt
+            mv .circleci/profiles.yml ~/.dbt/profiles.yml
+            cat  ~/.dbt/profiles.yml
+            sed -i -e "s/ARC_PASSWORD/${ARC_PASSWORD}/g" ~/.dbt/profiles.yml
+      - run:
+          name: Run dbt deps
+          command: cd talkspace && dbt deps
+      - run:
+          name: Run dbt parse
+          command: cd talkspace && dbt parse <<parameters.compile-params>>
+      - run:
+          name: Run dbt compile
+          command: cd talkspace && dbt compile <<parameters.compile-params>>
+  build-co:
+    parameters:
+      build-params:
+        description: Optional arguments to be passed to the dbt build command
+        default: "--exclude tag:hold tag:pit"
+        type: string
+    steps:
+      - run:
+          name: Run dbt build
+          command: cd talkspace && dbt build <<parameters.build-params>>
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
-workflows:
-  say-hello-workflow:
-    jobs:
-      - say-hello
+jobs:
+  build:
+    docker:
+      - image: cimg/python:3.11.0
+    steps:
+      - checkout
+      - run: python --version

@@ -1,0 +1,190 @@
+version: 2
+
+models:
+  ### room models
+  - name: stg_talktala_production__private_talks
+    description: Room-level table. Contains information about a client's virtual room.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'private_talks')
+    columns:
+      - name: status
+        tests:
+          - not_null
+          - accepted_values:
+              values: '{{ var("room_statuses").keys() }}'
+
+  - name: stg_talktala_production__first_purchase
+    description: Room-level table. Contains the first room conversion of each client.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'first_purchase')
+
+  ### user models
+  - name: stg_talktala_production__users
+    description: User/account-level table containing client, provider, and application admin data.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'users')
+    columns:
+      - name: user_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: '{{ var("user_types").keys() }}'
+
+  ### plan models
+  - name: stg_talktala_production__plan
+    description: Table containing information about all Talkspace plans.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'plan')
+
+  - name: stg_talktala_production__plan_details
+    description: >
+      Contains additional metadata about Talkspace's production plans, including partner_ids.
+      Talkspace administrators create plans and populate this data in Backoffice Admin.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'plan_details')
+    columns:
+      - name: account_type
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - b2c
+                - bh
+                - dte
+                - eap
+                - edu
+                - smb
+
+      - name: billing_format
+        tests:
+          - accepted_values:
+              values:
+                - b2b_vouchers
+                - claims
+                - onetime
+                - pepm
+                - ppu
+                - subscription
+
+      - name: product_line
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - couples
+                - demo
+                - giftcard
+                - individual
+                - maintenance
+                - research
+                - teen
+
+      - name: service_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['therapy', 'psychiatry']
+
+  - name: stg_talktala_production__plan_credit_settings
+    description: Contains video credit information for the Talkspace video plans.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'plan_credit_settings')
+
+  - name: stg_talktala_production__auto_cancellation_settings
+    description: Contains information on the auto-cancellation settings for the Talkspace plans.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'auto_cancellation_settings')
+
+  - name: stg_talktala_production__plan_to_plan_group
+    description: Maps individual plans to plan_groups, which grant some clients access to specific groups of therapists.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'plan_to_plan_group')
+
+  ### payment_type models
+  - name: stg_talktala_production__plan_type_payment_type_mapping
+    description: Mapping table. Contains the associated payment_type_id for all Talkspace plans. One plan can correspond to many payment types.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'plan_type_payment_type_mapping')
+
+  - name: stg_talktala_production__payment_types
+    description: Contains information about each payment type.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'payment_types')
+
+  - name: stg_talktala_production__payment_type_policies
+    description: Contains information about each payment type's policy.
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'payment_type_policies')
+
+  ### partner models
+  - name: stg_talktala_production__partner
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'partner')  
+  - name: stg_talktala_production__insurance_payers
+    tests:
+      - equal_column_counts:
+          compare_model: source('talktala_production', 'insurance_payers')
+
+  
+  - name: stg_talktala_production__session_reports
+    tests:
+        - equal_column_counts:
+            compare_model: source('talktala_production', 'session_reports')
+
+
+  # - name: stg_talktala_production__therapists
+  #   tests:
+  #     - equal_column_counts:
+  #         compare_model: source('talktala_production', 'therapists')
+  #   columns:
+  #     - name: therapist_id
+  #       tests:
+  #         - not_null
+  #         - relationships:
+  #             to: ref('stg_talktala_production__users')
+  #             field: id
+  #             config:
+  #               # ignore one old test therapist with no corresponding user
+  #               error_if: '>1'
+  #               warn_if: '>1'
+
+  #     - name: employment_position
+  #       tests:
+  #         - not_null
+  #         - accepted_values:
+  #             values:
+  #               - npp-clinician
+  #               - npp-associate
+  #               - npp-senior-team-lead
+  #               - icp-clinician
+  #               - icp-associate
+
+  #     - name: therapist_type
+  #       tests:
+  #         - not_null
+  #         - accepted_values:
+  #             values:
+  #               - consultation
+  #               - consultation_and_primary
+  #               - primary
+  #               - psychiatrist
+
+  # - name: stg_talktala_production__video_credits
+  #   columns:
+  #     - name: type
+  #       tests:
+  #         - not_null
+  #         - accepted_values:
+  #             values: ['introduction', 'psychiatry', 'therapy']

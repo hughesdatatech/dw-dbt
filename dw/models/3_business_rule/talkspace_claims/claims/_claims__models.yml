@@ -1,0 +1,372 @@
+version: 2
+
+models:
+  - name: br_claims__claims_data
+  - name: br_claims__claims_eras
+  
+  - name: br_claims__claims_payments
+    columns:
+      - name: client_postpaid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= allowed_amount - client_prepaid - insurance_paid'
+              condition: balance_status = 'paid' and allowed_amount - client_prepaid - insurance_paid > 0.00
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (balance_status = 'paid' and allowed_amount - client_prepaid - insurance_paid > 0.00)
+      - name: total_paid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= client_prepaid + client_postpaid + insurance_paid'
+      - name: client_paid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= client_prepaid + client_postpaid'
+      - name: cms_refunds
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service - (client_prepaid + client_postpaid) - insurance_paid'
+              condition: balance_status = 'paid' and cost_of_service - (client_prepaid + client_postpaid) - insurance_paid < 0.00
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service - client_prepaid - insurance_paid'
+              condition: not (balance_status = 'paid' and cost_of_service - (client_prepaid + client_postpaid) - insurance_paid < 0.00) and
+                        (cost_of_service - client_prepaid - insurance_paid < 0.00)
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (balance_status = 'paid' and cost_of_service - (client_prepaid + client_postpaid) - insurance_paid < 0.00) and 
+                         not (cost_of_service - client_prepaid - insurance_paid < 0.00)
+      - name: cost_of_service_less_allowed_amount
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service - allowed_amount'
+
+  - name: br_claims__claims
+  - name: br_claims__claims_submitted
+  - name: br_claims__claims_transactions
+  - name: br_claim_charge_agg
+
+  - name: br_claim_charge
+    columns:
+        - name: duplicate_charge_count
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: '= 0'
+        - name: zero_negative_charge_count
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: '= 0'
+            
+  - name: br_claim_refund_agg
+  - name: br_claim_refund
+
+  - name: br_claim_version_1794
+    columns:
+      - name: expected_revenue
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= client_prepaid + client_postpaid + insurance_paid'
+              condition: balance_status = 'paid' or claim_balance <= 0.00
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service'
+              condition: not (balance_status = 'paid' or claim_balance <= 0.00) and
+                         era_id is null
+          - dbt_utils.expression_is_true:
+              expression: '= allowed_amount'
+              condition: not (balance_status = 'paid' or claim_balance <= 0.00) and
+                         not era_id is null
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: total_paid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: insurance_paid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: insurance_payments_in_bank
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= insurance_paid'
+              condition: is_paid_era = 1
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (is_paid_era = 1)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: insurance_payments_owed_post_era
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= insurance_paid - insurance_paid'
+              condition: era_id is not null and 
+                         is_paid_era = 1
+          - dbt_utils.expression_is_true:
+              expression: '= insurance_paid - 0.00'
+              condition: era_id is not null and 
+                         not (is_paid_era = 1)
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (era_id is not null)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: insurance_owes
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: balance_status = 'paid' or claim_balance <= 0.00
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service - (client_prepaid + client_postpaid)'
+              condition: not (balance_status = 'paid' or claim_balance <= 0.00) and
+                         era_id is null
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (balance_status = 'paid' or claim_balance <= 0.00) and
+                         not (era_id is null)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: total_insurance_owes
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= insurance_paid - insurance_paid'
+              condition: era_id is not null and
+                         is_paid_era = 1
+          - dbt_utils.expression_is_true:
+              expression: '= insurance_paid - 0.00'
+              condition: era_id is not null and
+                         not (is_paid_era = 1)
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (era_id is not null and is_paid_era = 1) and
+                         not (era_id is not null and not (is_paid_era = 1)) and
+                         balance_status = 'paid'
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (era_id is not null and is_paid_era = 1) and
+                         not (era_id is not null and not (is_paid_era = 1)) and
+                         not (balance_status = 'paid') and
+                         claim_balance <= 0.00
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service - (client_prepaid + client_postpaid)'
+              condition: not (era_id is not null and is_paid_era = 1) and
+                         not (era_id is not null and not (is_paid_era = 1)) and
+                         not (balance_status = 'paid') and
+                         not (claim_balance <= 0.00) and
+                         era_id is null
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (era_id is not null and is_paid_era = 1) and
+                         not (era_id is not null and not (is_paid_era = 1)) and
+                         not (balance_status = 'paid') and
+                         not (claim_balance <= 0.00) and
+                         not (era_id is null)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: client_paid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: client_prepaid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: client_postpaid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: cms_refunds
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: client_owes
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: balance_status = 'paid' or claim_balance <= 0.00 or era_id is null
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (balance_status = 'paid' or claim_balance <= 0.00 or era_id is null) and
+                         allowed_amount - (client_prepaid + client_postpaid) - insurance_paid < 0.00
+          - dbt_utils.expression_is_true:
+              expression: '= allowed_amount - (client_prepaid + client_postpaid) - insurance_paid'
+              condition: not (balance_status = 'paid' or claim_balance <= 0.00 or era_id is null) and
+                         not (allowed_amount - (client_prepaid + client_postpaid) - insurance_paid < 0.00)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: remaining_balance
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service - insurance_paid - (client_prepaid + client_postpaid)'
+              condition: is_paid_era = 1
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service - 0.00 - (client_prepaid + client_postpaid)'
+              condition: not (is_paid_era = 1)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: expected_write_off
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= write_off_amount'
+              condition: claim_status = 'write_off'
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (claim_status = 'write_off') and
+                         era_id is null
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service - allowed_amount'
+              condition: not (claim_status = 'write_off') and
+                         not (era_id is null) and
+                         cost_of_service > allowed_amount
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service - admin_charge_amount - client_prepaid'
+              condition: not (claim_status = 'write_off') and
+                         not (era_id is null) and
+                         not (cost_of_service > allowed_amount) and
+                         admin_charge_amount > 0.00
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (claim_status = 'write_off') and
+                         not (era_id is null) and
+                         not (cost_of_service > allowed_amount) and
+                         not (admin_charge_amount > 0.00)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: cost_of_service_less_allowed_amount
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: allowed_amount
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: write_off_amount
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+
+  - name: br_claim_version_1922
+    columns:
+      - name: expected_revenue
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= client_prepaid + client_postpaid + insurance_paid'
+              condition: claim_status = 'complete'
+          - dbt_utils.expression_is_true:
+              expression: '= allowed_amount'
+              condition: not (claim_status = 'complete') and
+                         era_id is not null
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service'
+              condition: not (claim_status = 'complete') and
+                         not (era_id is not null)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: total_paid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= client_prepaid + client_postpaid + insurance_paid'
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: insurance_paid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: insurance_payments_in_bank
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= insurance_paid'
+              condition: is_paid_era = 1
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (is_paid_era = 1)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: insurance_payments_owed_post_era
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= insurance_paid'
+              condition: is_paid_era = 0
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (is_paid_era = 0)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: insurance_owes
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service'
+              condition: era_id is null
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (era_id is null)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: total_insurance_owes
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= cost_of_service'
+              condition: era_id is null
+          - dbt_utils.expression_is_true:
+              expression: '= insurance_paid'
+              condition: not (era_id is null) and
+                         is_paid_era = 0
+          - dbt_utils.expression_is_true:
+              expression: '= 0.00'
+              condition: not (era_id is null) and
+                         not (is_paid_era = 0)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: client_paid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= client_prepaid + client_postpaid'
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: client_prepaid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: client_postpaid
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: cms_refunds
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: client_owes
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: remaining_balance
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: expected_write_off
+      - name: cost_of_service_less_allowed_amount
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: allowed_amount
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      - name: write_off_amount
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+      
+  - name: br_claim
+    columns:
+      - name: is_valid_and_complete
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: '= True'
+              condition: is_test_claim <> 1 and claim_status <> 'cancelled' and rv_claims__claims_key_status = 'active' and
+                          completed_at is not null and therapy_duration_minutes is not null
+          - dbt_utils.expression_is_true:
+              expression: '= False'
+              condition: not (is_test_claim <> 1 and claim_status <> 'cancelled' and rv_claims__claims_key_status = 'active' and
+                          completed_at is not null and therapy_duration_minutes is not null)
+          - dbt_utils.expression_is_true:
+              expression: 'is not null'
+              

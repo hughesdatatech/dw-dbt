@@ -1,0 +1,88 @@
+version: 2
+
+sources:
+  - name: talktala_production
+    description: A replica of the primary schema in our production application database
+    tables:
+      - name: message_transcripts
+        tests:
+          - dbt_utils.recency:
+              datepart: hour
+              field: created_at
+              interval: 4
+
+      ### plan tables
+      - name: plan
+      - name: plan_details
+        tests:
+          - dbt_utils.recency:
+              datepart: month
+              field: created_at
+              interval: 1
+              config:
+                severity: warn
+      - name: plan_credit_settings
+      - name: auto_cancellation_settings
+      - name: plan_to_plan_group
+
+      ### payment_type tables
+      - name: plan_type_payment_type_mapping
+      - name: payment_types
+      - name: payment_type_policies
+
+      ### room tables
+      - name: first_purchase
+        tests:
+          - dbt_utils.recency:
+              datepart: hour
+              field: conversion_date
+              interval: 4
+      - name: private_talks
+        tests:
+          - dbt_utils.recency:
+              datepart: hour
+              field: created_at
+              interval: 4
+      - name: private_talk_media
+        tests:
+          - dbt_utils.recency:
+              datepart: hour
+              field: upload_date
+              interval: 4
+      - name: private_talks_php_chat
+        tests:
+          - dbt_utils.recency:
+              datepart: hour
+              field: created_at
+              interval: 4
+
+      ### partner tables
+      - name: partner
+      - name: insurance_payers
+
+
+      - name: therapists
+        columns:
+          - name: is_test
+            tests:
+              - not_null
+      - name: users
+        tests:
+          - dbt_utils.recency:
+              datepart: hour
+              field: created_at
+              interval: 4
+      - name: video_credits
+        tests:
+          - dbt_utils.recency:
+              datepart: hour
+              field: created_at
+              interval: 4
+      - name: voucher_usage
+        tests:
+          - dbt_utils.recency:
+              datepart: hour
+              field: creation_date
+              interval: 4
+      - name: payment_transactions
+      - name: session_reports

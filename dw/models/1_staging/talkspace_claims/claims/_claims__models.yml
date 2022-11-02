@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: stg_claims__claims_data
+    tests:
+        - equal_column_counts:
+            compare_model: source('claims', 'claims_data')
+
+  - name: stg_claims__claims_eras
+    tests:
+        - equal_column_counts:
+            compare_model: source('claims', 'claims_eras')
+
+  - name: stg_claims__claims_payments
+    tests:
+        - equal_column_counts:
+            compare_model: source('claims', 'claims_payments')
+
+  - name: stg_claims__claims_submitted
+    tests:
+        - equal_column_counts:
+            compare_model: source('claims', 'claims_submitted')
+
+  - name: stg_claims__claims_transactions
+    tests:
+        - equal_column_counts:
+            compare_model: source('claims', 'claims_transactions')
+
+  - name: stg_claims__claims
+    tests:
+        - equal_column_counts:
+            compare_model: source('claims', 'claims')
+                

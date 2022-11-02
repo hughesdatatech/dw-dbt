@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: claims
+    description: A replica of the claims schema in our production application database
+    tables:
+      - name: claims_data
+      - name: claims_eras
+      - name: claims_payments
+      - name: claims_submitted
+      - name: claims_transactions
+      - name: claims

@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: date_series
+    description: Calendar-type table containing the date parts (full date, year, quarter, month, week, day).
+
+models:
+  - name: process_log_stg_rv_dupe_test
+    columns:
+      - name: key_dupes
+        tests:
+          - process_log_load_succeeded
+
+  - name: process_log_stg_rv_recon_test
+    columns:
+      - name: unique_key_tgt_not_loaded
+        tests:
+          - process_log_load_succeeded
+
+  - name: process_log_key_status_tracking
+  
