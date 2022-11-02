@@ -53,7 +53,7 @@ commands: #-co
 jobs:
   build:
     docker:
-      - image: cimg/python:3.11.0
+      - image: cimg/python:3.10.8
     steps:
       - checkout
       - run: python --version
