@@ -45,4 +45,4 @@ jobs:
           # This assumes pytest is installed via the install-package step above
           command: |
             python --version
-            dbt debug
+            cd dw && dbt debug
