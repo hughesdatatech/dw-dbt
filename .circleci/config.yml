@@ -1,35 +1,24 @@
 version: 2.1
 
 orbs:
-  # The python orb contains a set of prepackaged circleci configuration you can use repeatedly in your configurations files
-  # Orb commands and jobs help you with common scripting around a language/tool
-  # so you dont have to copy and paste it everywhere.
-  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@2.1.1
   slack: circleci/slack@4.10.1
 
-workflows:
-  daily-elt:  # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
-    # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows
-    jobs:
-      - build-and-test
+parameters: #-pp
+  manual-trigger-pp:
+    type: string
+    default: ""
+  dbt-vars:
+    type: string
+    default: "--vars 'test_row_limit: 10'"
 
-jobs:
-  build-and-test:  # This is the name of the job, feel free to change it to better match what you're trying to do!
-    # These next lines defines a docker executors: https://circleci.com/docs/2.0/executor-types/
-    # You can specify an image from dockerhub or use one of the convenience images from CircleCI's Developer Hub
-    # A list of available CircleCI docker convenience images are available here: https://circleci.com/developer/images/image/cimg/python
-    # The executor is the environment in which the steps below will be executed - below will use a python 3.9 container
-    # Change the version below to your required version of python
-    docker:
-      #- image: cimg/python:3.9.15
-      - image: cimg/python:3.10.8
-    # Checkout the code as the first step. This is a dedicated CircleCI step.
-    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
-    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
-    # Then run your tests!
-    # CircleCI will report the results back to your VCS provider.
+commands: #-co
+  setup-and-compile-co:
+    parameters:
+      compile-params:
+        description: Optional arguments to be passed to the dbt compile command
+        default: ""
+        type: string
     steps:
       - checkout
       - run:
@@ -38,18 +27,38 @@ jobs:
             mkdir -p ~/.dbt
             mv .circleci/profiles.yml ~/.dbt/profiles.yml 
             cat  ~/.dbt/profiles.yml
-            mv .circleci/requirements.txt  ~/.dbt/requirements.txt            
+            mv .circleci/requirements.txt  ~/.dbt/requirements.txt
       - python/install-packages:
           pkg-manager: pip
           app-dir: ~/.dbt/  # If you're requirements.txt isn't in the root directory.
-          # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
+          # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements. 
       - run:
-          name: Run job
-          # This assumes pytest is installed via the install-package step above
-          # pipx install "meltano"
-          command: |
-            python --version
-            cd dw && dbt run --select stg_demo_schema__demo_table
+          name: Run dbt deps
+          command: cd talkspace && dbt deps
+      - run:
+          name: Run dbt parse
+          command: cd talkspace && dbt parse <<parameters.compile-params>>
+      - run:
+          name: Run dbt compile
+          command: cd talkspace && dbt compile <<parameters.compile-params>>
+  build-co:
+    parameters:
+      build-params:
+        description: Optional arguments to be passed to the dbt build command
+        default: "--exclude tag:hold tag:pit"
+        type: string
+    steps:
+      - run:
+          name: Run dbt build
+          command: cd talkspace && dbt build <<parameters.build-params>>
+
+jobs: #-jb
+  setup-and-compile-jb:
+    docker:
+      - image: cimg/python:3.10.8
+    steps:
+      - setup-and-compile-co:
+          compile-params: ""
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
@@ -58,3 +67,88 @@ jobs:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
+  dbt-sf-runner-test-jb:
+    docker:
+      - image: cimg/python:3.10.8
+    steps:
+      - setup-and-compile-co:
+          compile-params: "--target arc_test"
+      - build-co:
+          build-params: "--target arc_test << pipeline.parameters.dbt-vars >> --exclude tag:hold"
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
+  dbt-sf-runner-daily-jb:
+    docker:
+      - image: cimg/python:3.10.8
+    steps:
+      - setup-and-compile-co:
+          compile-params: ""
+      - build-co:
+          build-params: "--exclude tag:hold tag:pit"
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
+  dbt-sf-runner-monthly-pit-jb:
+    docker:
+      - image: cimg/python:3.10.8
+    steps:
+      - setup-and-compile-co:
+          compile-params: ""
+      - build-co:
+          build-params: "--exclude tag:hold"
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
+             
+workflows: #-wf
+  version: 2
+  setup-and-compile-wf:
+    when:
+      or:
+        - equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
+        - equal: [ "webhook", << pipeline.trigger_source >> ]
+    jobs:
+      - setup-and-compile-jb:
+          filters:
+            branches:
+              only: 
+                - main
+                - development
+  test-wf:
+    when:
+      or:
+        - equal: [ "dbt-sf-runner-test", << pipeline.parameters.manual-trigger-pp >> ]
+        - equal: [ "dbt-sf-runner-test", << pipeline.schedule.name >> ]
+    jobs:
+      - dbt-sf-runner-test-jb
+  scheduled-pipeline-daily-wf:
+    when:
+      or:
+        - equal: [ "dbt-sf-runner-daily", << pipeline.parameters.manual-trigger-pp >> ]
+        - equal: [ "dbt-sf-runner-daily", << pipeline.schedule.name >> ]
+    jobs:
+      - dbt-sf-runner-daily-jb
+  scheduled-pipeline-monthly-pit-wf:
+    when:
+      or:
+        - equal: [ "dbt-sf-runner-monthly-pit", << pipeline.parameters.manual-trigger-pp >> ]
+        - equal: [ "dbt-sf-runner-monthly-pit", << pipeline.schedule.name >> ]
+    jobs:
+      - dbt-sf-runner-monthly-pit-jb
+  
