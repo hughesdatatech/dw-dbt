@@ -34,13 +34,13 @@ commands: #-co
           # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements. 
       - run:
           name: Run dbt deps
-          command: cd talkspace && dbt deps
+          command: cd dw && dbt deps
       - run:
           name: Run dbt parse
-          command: cd talkspace && dbt parse <<parameters.compile-params>>
+          command: cd dw && dbt parse <<parameters.compile-params>>
       - run:
           name: Run dbt compile
-          command: cd talkspace && dbt compile <<parameters.compile-params>>
+          command: cd dw && dbt compile <<parameters.compile-params>>
   build-co:
     parameters:
       build-params:
@@ -50,7 +50,7 @@ commands: #-co
     steps:
       - run:
           name: Run dbt build
-          command: cd talkspace && dbt build <<parameters.build-params>>
+          command: cd dw && dbt build <<parameters.build-params>>
 
 jobs: #-jb
   setup-and-compile-jb:
