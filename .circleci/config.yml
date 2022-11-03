@@ -6,6 +6,7 @@ orbs:
   # so you dont have to copy and paste it everywhere.
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@2.1.1
+  slack: circleci/slack@4.10.1
 
 workflows:
   sample:  # This is the name of the workflow, feel free to change it to better match your workflow.
@@ -49,3 +50,11 @@ jobs:
             python --version
             cd dw && dbt debug
             pipx install "meltano"
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
