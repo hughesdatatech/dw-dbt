@@ -20,7 +20,7 @@ all_keys_w_stat as (
 {% else %}
       
     select
-        null::varbyte(64) as rv___hk,
+        null::varbinary(64) as rv___hk,
         null::varchar as rec_source,
         null::varchar as rv_key_status,
         null::integer as row_sqn

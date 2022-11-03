@@ -31,25 +31,21 @@ on-run-end: "{{ process_log_handler(component='job', job_step='on-run-end') }}"
 models:
   +pre-hook:
     sql: "{{ process_log_handler(component='model', job_step='pre-hook') }}"
-    transaction: false
+    #transaction: false
   +post-hook:
     sql: "{{ process_log_handler(component='model', job_step='post-hook') }}"
-    transaction: false
+    #transaction: false
   talkspace:
     +bind: false # Late-binding views so DMS can drop and recreate underlying tables.
     1_staging:
       +materialized: table
-      stripe:
-        stripe_mobile:
-      talkspace_app:
-        talktala_production:
-      talkspace_claims:
-        claims:
+      demo_source: # application name
+        demo_schema: # schema name
     3_business_rule:
       +materialized: view
     4_info_mart:
       +materialized: table
-      financial_billing:
+      subject_area:
         +materialized: view
         current:
           +materialized: table
@@ -58,39 +54,10 @@ models:
         point_in_time:
           +tags: pit
           +materialized: incremental
-      financial_transaction:
-        +materialized: view
-        current:
-          +materialized: table
-        historical:
-          +materialized: incremental
-        point_in_time:
-          +tags: pit
-          +materialized: incremental
-      session:
-        +materialized: view
-        current:
-          +materialized: table
-        historical:
-          +materialized: incremental
-        point_in_time:
-          +tags: pit
-          +materialized: incremental
-      claim:
-        +materialized: view
-        current:
-          +materialized: table
-        historical:
-          +materialized: incremental
-        point_in_time:
-          +tags: pit
-          +materialized: incremental
-      user:
-        +materialized: table
     5_metrics_rule:
       +materialized: view
     6_metrics_mart:
-      financial_transaction:
+      subject_area:
         +materialized: view
         current:
           +materialized: table
@@ -112,10 +79,10 @@ models:
 snapshots:
   +pre-hook:
     sql: "{{ process_log_handler(component='snapshot', job_step='pre-hook') }}"
-    transaction: false
+    #transaction: false
   +post-hook:
     sql: "{{ process_log_handler(component='snapshot', job_step='post-hook') }}"
-    transaction: false
+    #transaction: false
   talkspace:
     2_raw_vault:
       +tags: 
@@ -172,7 +139,7 @@ vars:
 
   run_key: 0
 
-  clean_all_objects_key: '^^^talkspace34'
+  clean_all_objects_key: '^^^xyz***34'
 
   null_key_int: 'null'
 
@@ -202,7 +169,7 @@ vars:
 
   extracted_at_default: _dms_replication_ts
 
-  loaded_at_default: sysdate
+  loaded_at_default: sysdate()
 
   process_log: process_log
 
@@ -240,327 +207,24 @@ vars:
   #
   ########################################################################################################################
 
-  stg_claims__model_config:
-      claims__claims_data: 
+  stg_demo_schema__model_config:
+      demo_schema__demo_table: 
         track_key_deletes: true 
         unique_key: ['id']
         boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      claims__claims_eras: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      claims__claims_payments: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      claims__claims_submitted: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      claims__claims_transactions: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      claims__claims: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-
-  stg_talktala_production__model_config:
-      talktala_production__session_reports: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      talktala_production__insurance_payers: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      talktala_production__payment_transactions: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-
-  stg_payout__model_config: 
-      payout__private_talk_history_flat: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-
-  stg_stripe_mobile__model_config: 
-      stripe_mobile__balance_transaction_fee_details: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__balance_transactions: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__charge_groups: 
-        track_key_deletes: false 
-        unique_key: ['charge_id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__charges_metadata: 
-        track_key_deletes: true 
-        unique_key: ['charge_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__charges: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols: ['captured', 'card_default_for_currency', 'paid', 'refunded']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__coupons_metadata: 
-        track_key_deletes: true 
-        unique_key: ['coupon_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__coupons: 
-        track_key_deletes: true 
-        unique_key: ['id', 'created']
-        boolean_cols: ['valid']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__credit_note_line_item_tax_amounts: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols: ['inclusive']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__credit_note_line_items: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__credit_notes_metadata: 
-        track_key_deletes: true 
-        unique_key: ['credit_note_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__credit_notes: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__customers: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols: ['deleted', 'delinquent']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__disputes_metadata: 
-        track_key_deletes: true 
-        unique_key: ['dispute_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__disputes: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols: ['is_charge_refundable', 'evidence_details_has_evidence', 'evidence_details_past_due', 'network_details_visa_rapid_dispute_resolution']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__early_fraud_warnings: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols: ['actionable']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__exchange_rates_from_usd: 
-        track_key_deletes: false 
-        unique_key: ['date']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__invoice_items_metadata: 
-        track_key_deletes: true 
-        unique_key: ['invoice_item_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__invoice_items: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols: ['discountable', 'proration']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__invoice_line_items: 
-        track_key_deletes: false 
-        unique_key: ['invoice_id', 'source_id', 'plan_id']
-        boolean_cols: ['discountable', 'proration']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__invoices_metadata: 
-        track_key_deletes: true 
-        unique_key: ['invoice_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__invoices: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols: ['attempted', 'auto_advance', 'paid', 'paid_out_of_band'] 
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__payment_intents_metadata: 
-        track_key_deletes: true 
-        unique_key: ['payment_intent_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__payment_intents: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__payment_reviews: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols: ['open']
-      stripe_mobile__plans_metadata: 
-        track_key_deletes: true 
-        unique_key: ['plan_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__plans: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols: ['interval']
-        boolean_reserved_cols:
-      stripe_mobile__prices_metadata: 
-        track_key_deletes: true 
-        unique_key: ['price_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__prices: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__products_metadata: 
-        track_key_deletes: true 
-        unique_key: ['product_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__products: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols: ['active', 'shippable']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__refunds_metadata: 
-        track_key_deletes: true 
-        unique_key: ['refund_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__refunds: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__rule_decisions: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols: ['rule_override_by_allow_rule']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__subscription_items: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__subscriptions_metadata: 
-        track_key_deletes: true 
-        unique_key: ['subscription_id', 'key']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__subscriptions: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols: ['cancel_at_period_end', 'billing_thresholds_reset_billing_cycle_anchor']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__tax_rates: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols: ['active', 'inclusive']
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__transfer_reversals: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
-      stripe_mobile__transfers: 
-        track_key_deletes: false 
-        unique_key: ['id']
-        boolean_cols: ['automatic', 'reversed']
         reserved_cols:
         boolean_reserved_cols:
 
   # Schema configuration used internally by the DW.
   stg_schema_config:
-      stripe_mobile:
+      demo_schema:
         snapshot_strategy: check
         snapshot_updated_at_col: 
         staging_model_default_exception_cols: 
         staging_model_order_by_cols: ['1 desc']
-      talktala_production:
-        snapshot_strategy: timestamp
-        snapshot_updated_at_col: _dms_cdc_ts
-        staging_model_default_exception_cols: ['_dms_operation']
-        staging_model_order_by_cols: ['_dms_cdc_ts desc','_dms_replication_ts desc']
-      claims:
-        snapshot_strategy: timestamp
-        snapshot_updated_at_col: _dms_cdc_ts
-        staging_model_default_exception_cols: ['_dms_operation']
-        staging_model_order_by_cols: ['_dms_cdc_ts desc','_dms_replication_ts desc']
-      payout:
-        snapshot_strategy: timestamp
-        snapshot_updated_at_col: _dms_cdc_ts
-        staging_model_default_exception_cols: ['_dms_operation']
-        staging_model_order_by_cols: ['_dms_cdc_ts desc','_dms_replication_ts desc']
+      #talktala_production:
+        #snapshot_strategy: timestamp
+        #snapshot_updated_at_col: _dms_cdc_ts
+        #staging_model_default_exception_cols: ['_dms_operation']
+        #staging_model_order_by_cols: ['_dms_cdc_ts desc','_dms_replication_ts desc']
+      

@@ -12,7 +12,7 @@ select
     'monthly snapshot has run' as error_msg
 from {{ model }} 
 where 
-    cast(trunc(sysdate) as date) = (
+    cast(trunc(sysdate()) as date) = (
             select 
                 cast(nvl(max(to_char(inserted_at, 'YYYY-MM-DD')), '0001-01-01') as date) 
             from {{ target.schema }}.{{ var('process_log') }} 

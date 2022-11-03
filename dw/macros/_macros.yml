@@ -152,7 +152,7 @@ macros:
 
   - name: build_hash_value
     description: >
-          Macro applies the sha2 hash function with 256 bits to an input value or column, and returns a varbyte of length 64. 
+          Macro applies the sha2 hash function with 256 bits to an input value or column, and returns a varbinary of length 64. 
           NB: See build_hash_diff macro for more details on the purpose of hashing.
     arguments:
       - name: value

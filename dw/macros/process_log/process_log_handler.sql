@@ -8,8 +8,8 @@
                 job_id varchar(500), 
                 job_step_component varchar(500), 
                 job_step varchar(1000), 
-                job_step_add_info1 varchar(max), 
-                job_step_add_info2 varchar(max), 
+                job_step_add_info1 varchar, 
+                job_step_add_info2 varchar, 
                 loaded_at timestamp, 
                 inserted_at timestamp
             )

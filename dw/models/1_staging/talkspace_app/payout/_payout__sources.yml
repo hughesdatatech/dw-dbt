@@ -1,9 +1,0 @@
-version: 2
-
-sources:
-  - name: payout
-    description: A replica of the schema used to calculate payout for ICPs/1099s
-    tables:
-      - name: private_talk_history_flat
-        description: >
-          A flattened or pivoted version of talktala_production.private_talks_history.
