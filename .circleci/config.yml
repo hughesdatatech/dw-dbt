@@ -36,6 +36,9 @@ commands: #-co
           name: Run dbt deps
           command: cd dw && dbt deps
       - run:
+          name: Install Meltano
+          command: pipx install "meltano"
+      - run:
           name: Run dbt parse
           command: cd dw && dbt parse <<parameters.compile-params>>
       - run:

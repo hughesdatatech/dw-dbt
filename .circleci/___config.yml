@@ -49,7 +49,6 @@ jobs:
           # pipx install "meltano"
           command: |
             python --version
-            pipx install "meltano"
             cd dw && dbt run --select stg_demo_schema__demo_table
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
