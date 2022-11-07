@@ -42,6 +42,9 @@ commands: #-co
           name: Install Rest API Extractor
           command: cd dw-meltano/dw-ownbackup && meltano install extractor tap-rest-api-msdk
       - run:
+          name: Install Snowflake Loader
+          command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
+      - run:
           name: Run dbt parse
           command: cd dw && dbt parse <<parameters.compile-params>>
       - run:
