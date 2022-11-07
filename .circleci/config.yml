@@ -36,14 +36,17 @@ commands: #-co
           name: Run dbt deps
           command: cd dw && dbt deps
       - run:
-          name: Install Meltano
+          name: Install meltano
           command: pipx install "meltano"
       - run:
-          name: Install Rest API Extractor
+          name: Install rest api extractor
           command: cd dw-meltano/dw-ownbackup && meltano install extractor tap-rest-api-msdk
       - run:
-          name: Install Snowflake Loader
+          name: Install snowflake loader
           command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
+      - run:
+          name: Extract json data
+          command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
       - run:
           name: Run dbt parse
           command: cd dw && dbt parse <<parameters.compile-params>>
