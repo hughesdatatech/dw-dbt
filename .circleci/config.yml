@@ -35,24 +35,24 @@ commands: #-co
       - run:
           name: Run dbt deps
           command: cd dw && dbt deps
-      - run:
-          name: Install meltano
-          command: pipx install "meltano"
-      - run:
-          name: Install rest api extractor
-          command: cd dw-meltano/dw-ownbackup && meltano install extractor tap-rest-api-msdk
-      - run:
-          name: Install snowflake loader
-          command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
+      #- run:
+          #name: Install meltano
+          #command: pipx install "meltano"
+      #- run:
+          #name: Install rest api extractor
+          #command: cd dw-meltano/dw-ownbackup && meltano install extractor tap-rest-api-msdk
+      #- run:
+          #name: Install snowflake loader
+          #command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
       #- run:
           #name: Extract json data
           #command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
-      - run:
-          name: Run dbt parse
-          command: cd dw && dbt parse <<parameters.compile-params>>
-      - run:
-          name: Run dbt compile
-          command: cd dw && dbt compile <<parameters.compile-params>>
+      #- run:
+          #name: Run dbt parse
+          #command: cd dw && dbt parse <<parameters.compile-params>>
+      #- run:
+          #name: Run dbt compile
+          #command: cd dw && dbt compile <<parameters.compile-params>>
   extract-load-co:
     parameters:
       run-params:
@@ -97,8 +97,6 @@ jobs: #-jb
               ]
             }
           event: always
-          #template: basic_success_1
-          #mentions: 'Setup and compile start...'
       - setup-and-compile-co:
           compile-params: ""
       - slack/notify:
@@ -181,6 +179,7 @@ workflows: #-wf
         - equal: [ "dbt-sf-runner-test", << pipeline.schedule.name >> ]
     jobs:
       - dbt-sf-runner-test-jb
+      - dbt-sf-runner-daily-jb
   scheduled-pipeline-daily-wf:
     when:
       or:
