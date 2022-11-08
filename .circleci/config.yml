@@ -172,6 +172,7 @@ workflows: #-wf
               only: 
                 - main
                 - development
+      - dbt-sf-runner-daily-jb
   test-wf:
     when:
       or:
@@ -179,7 +180,7 @@ workflows: #-wf
         - equal: [ "dbt-sf-runner-test", << pipeline.schedule.name >> ]
     jobs:
       - dbt-sf-runner-test-jb
-      - dbt-sf-runner-daily-jb
+      #- dbt-sf-runner-daily-jb
   scheduled-pipeline-daily-wf:
     when:
       or:
