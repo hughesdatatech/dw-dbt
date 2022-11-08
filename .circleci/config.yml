@@ -129,8 +129,8 @@ jobs: #-jb
     docker:
       - image: cimg/python:3.9.7
     steps:
-      - setup-and-compile-co:
-          compile-params: ""
+      #- setup-and-compile-co:
+          #compile-params: ""
       - build-co:
           build-params: "--exclude tag:hold tag:pit"
       - slack/notify:
@@ -172,7 +172,6 @@ workflows: #-wf
               only: 
                 - main
                 - development
-      - dbt-sf-runner-daily-jb
   test-wf:
     when:
       or:
@@ -187,7 +186,10 @@ workflows: #-wf
         - equal: [ "dbt-sf-runner-daily", << pipeline.parameters.manual-trigger-pp >> ]
         - equal: [ "dbt-sf-runner-daily", << pipeline.schedule.name >> ]
     jobs:
-      - dbt-sf-runner-daily-jb
+      - setup-and-compile-jb
+      - dbt-sf-runner-daily-jb:
+          requires:
+            - setup-and-compile-jb
   scheduled-pipeline-monthly-pit-wf:
     when:
       or:
