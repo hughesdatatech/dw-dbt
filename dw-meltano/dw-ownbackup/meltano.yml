@@ -8,11 +8,11 @@ environments:
       extractors:
       - name: tap-rest-api-msdk
         config:
-          name: stg-pagov-opioidstays
+          name: data-pa-stg-pagov__opioidstays
           api_url: https://data.pa.gov/resource/r2n4-n2i4.json
           "streams": [
             {
-                "name": "stg-pagov-opioidstays",
+                "name": "data-pa-stg-pagov__opioidstays",
                 "path": "/",
                 "primary_keys": ["county_name"]
             }
