@@ -45,3 +45,5 @@ plugins:
   - name: target-snowflake
     variant: transferwise
     pip_url: pipelinewise-target-snowflake
+
+    
