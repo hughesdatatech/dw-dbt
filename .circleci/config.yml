@@ -75,6 +75,7 @@ jobs: #-jb
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
           template: basic_success_1
+          mentions: 'testing 123'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
