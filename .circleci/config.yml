@@ -21,6 +21,24 @@ commands: #-co
         type: string
     steps:
       - checkout
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "Setup and compile start...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: always
       - run:
           name: Set up dbt profile
           command: |
@@ -79,24 +97,6 @@ jobs: #-jb
     docker:
       - image: cimg/python:3.9.7
     steps:
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "Setup and compile start...",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: always
       - setup-and-compile-co:
           compile-params: ""
       - slack/notify:
