@@ -81,9 +81,24 @@ jobs: #-jb
     steps:
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "Setup and compile start...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
           event: always
-          template: basic_success_1
-          mentions: 'Setup and compile start...'
+          #template: basic_success_1
+          #mentions: 'Setup and compile start...'
       - setup-and-compile-co:
           compile-params: ""
       - slack/notify:
