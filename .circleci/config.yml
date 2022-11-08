@@ -53,16 +53,6 @@ commands: #-co
       - run:
           name: Run dbt compile
           command: cd dw && dbt compile <<parameters.compile-params>>
-   extract-load-co:
-    parameters:
-      run-params:
-        description: Optional arguments to be passed to the meltano run command
-        default: "--exclude tag:hold tag:pit"
-        type: string
-    steps:
-      - run:
-          name: Extract json data
-          command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
   build-co:
     parameters:
       build-params:
@@ -81,16 +71,15 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: ""
-    - slack/notify:
-        channel: $SLACK_DEFAULT_CHANNEL
-        event: pass
-        template: basic_success_1
-        mentions: 'Setup and compile success!'
-    - slack/notify:
-        channel: $SLACK_DEFAULT_CHANNEL
-        event: fail
-        template: basic_fail_1
-        mentions: 'Setup and compile fail!'
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+          mentions: 'testing 123'
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
   dbt-sf-runner-test-jb:
     docker:
       - image: cimg/python:3.9.7
@@ -112,19 +101,17 @@ jobs: #-jb
       - image: cimg/python:3.9.7
     steps:
       - setup-and-compile-co:
-        compile-params: ""
+          compile-params: ""
       - build-co:
           build-params: "--exclude tag:hold tag:pit"
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
           template: basic_success_1
-          mentions: 'Build success!'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
-          mentions: 'Build fail!'
   dbt-sf-runner-monthly-pit-jb:
     docker:
       - image: cimg/python:3.9.7
