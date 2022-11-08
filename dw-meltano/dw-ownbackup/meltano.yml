@@ -25,11 +25,11 @@ environments:
           user: shughes
           password: Q!B0oimh0o
           warehouse: DW_WH_XS
-          file_format: dw_dev.dbt_steve.json_format
+          file_format: dw_dev.pagov.json_format
           role: accountadmin
           default_target_schema: pagov
           s3_bucket: arn:aws:s3:us-east-1:774809006633:accesspoint/stage-ap
-          stage: dbt_steve.hughedatatech_ext_s3_stage
+          stage: pagov.hughedatatech_ext_s3_stage
           aws_access_key_id: AKIA3IZRXGIUUB2ZS36Z
           aws_secret_access_key: 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
 - name: staging
