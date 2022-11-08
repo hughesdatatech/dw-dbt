@@ -44,9 +44,9 @@ commands: #-co
       - run:
           name: Install snowflake loader
           command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
-      #- run:
-         # name: Extract json data
-         # command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
+      - run:
+          name: Extract json data
+          command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
       - run:
           name: Run dbt parse
           command: cd dw && dbt parse <<parameters.compile-params>>
@@ -111,8 +111,8 @@ jobs: #-jb
     docker:
       - image: cimg/python:3.9.7
     steps:
-      #- setup-and-compile-co:
-          #compile-params: ""
+      - setup-and-compile-co:
+        compile-params: ""
       - build-co:
           build-params: "--exclude tag:hold tag:pit"
       - slack/notify:
@@ -151,12 +151,6 @@ workflows: #-wf
         - equal: [ "webhook", << pipeline.trigger_source >> ]
     jobs:
       - setup-and-compile-jb:
-          filters:
-            branches:
-              only: 
-                - main
-                - development
-      - dbt-sf-runner-daily-jb:
           filters:
             branches:
               only: 
