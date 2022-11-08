@@ -8,11 +8,11 @@ environments:
       extractors:
       - name: tap-rest-api-msdk
         config:
-          name: data-pa-gov-opioid-stays
+          name: stg-pagov-opioidstays
           api_url: https://data.pa.gov/resource/r2n4-n2i4.json
           "streams": [
             {
-                "name": "data-pa-gov-opioid-stays",
+                "name": "stg-pagov-opioidstays",
                 "path": "/",
                 "primary_keys": ["county_name"]
             }
@@ -29,8 +29,6 @@ environments:
           role: accountadmin
           default_target_schema: dbt_steve
           s3_bucket: arn:aws:s3:us-east-1:774809006633:accesspoint/stage-ap
-          #s3_endpoint_url: s3://HUGHESDATATECH-S3-STAGE
-          #s3_region_name: "us‑east‑1"
           stage: dbt_steve.hughedatatech_ext_s3_stage
           aws_access_key_id: AKIA3IZRXGIUUB2ZS36Z
           aws_secret_access_key: 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
@@ -45,5 +43,4 @@ plugins:
   - name: target-snowflake
     variant: transferwise
     pip_url: pipelinewise-target-snowflake
-
     
