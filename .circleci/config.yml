@@ -81,16 +81,16 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: ""
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: pass
-          template: basic_success_1
-          mentions: 'Setup and compile success!'
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1
-          mentions: 'Setup and compile fail!'
+    - slack/notify:
+        channel: $SLACK_DEFAULT_CHANNEL
+        event: pass
+        template: basic_success_1
+        mentions: 'Setup and compile success!'
+    - slack/notify:
+        channel: $SLACK_DEFAULT_CHANNEL
+        event: fail
+        template: basic_fail_1
+        mentions: 'Setup and compile fail!'
   dbt-sf-runner-test-jb:
     docker:
       - image: cimg/python:3.9.7
