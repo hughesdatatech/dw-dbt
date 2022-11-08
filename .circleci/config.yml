@@ -44,15 +44,25 @@ commands: #-co
       - run:
           name: Install snowflake loader
           command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
-      - run:
-          name: Extract json data
-          command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
+      #- run:
+          #name: Extract json data
+          #command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
       - run:
           name: Run dbt parse
           command: cd dw && dbt parse <<parameters.compile-params>>
       - run:
           name: Run dbt compile
           command: cd dw && dbt compile <<parameters.compile-params>>
+  extract-load-co:
+    parameters:
+      run-params:
+        description: Optional arguments to be passed to the dbt build command
+        default: "--exclude tag:hold tag:pit"
+        type: string
+    steps:
+      - run:
+          name: Extract json data
+          command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
   build-co:
     parameters:
       build-params:
@@ -69,17 +79,23 @@ jobs: #-jb
     docker:
       - image: cimg/python:3.9.7
     steps:
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: any
+          template: basic_success_1
+          mentions: 'Setup and compile start...'
       - setup-and-compile-co:
           compile-params: ""
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
           template: basic_success_1
-          mentions: 'testing 123'
+          mentions: 'Setup and compile success!'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
+          mentions: 'Setup and compile fail!'
   dbt-sf-runner-test-jb:
     docker:
       - image: cimg/python:3.9.7
