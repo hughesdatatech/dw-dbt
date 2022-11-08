@@ -3,4 +3,4 @@ version: 2
 sources:
     - name: pagov
       tables:
-        - name: stg_pagov__opioidstays
+        - name: pagov__opioid_stays
