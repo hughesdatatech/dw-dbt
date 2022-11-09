@@ -90,23 +90,23 @@ commands: #-co
         type: string
     steps:
       - slack/notify:
-        channel: $SLACK_DEFAULT_CHANNEL
-        custom: |
-          {
-            "blocks": [
-              {
-                "type": "section",
-                "fields": [
-                  {
-                    "type": "plain_text",
-                    "text": "starting meltano extract / load...",
-                    "emoji": true
-                  }
-                ]
-              }
-            ]
-          }
-        event: always
+          channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "starting meltano extract / load...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: always
       - run:
           name: Extract json data
           command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
@@ -120,7 +120,7 @@ commands: #-co
           event: fail
           template: basic_fail_1
           mentions: 'meltano extract / load failed!'
-
+          
   build-co:
     parameters:
       build-params:
