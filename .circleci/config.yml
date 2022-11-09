@@ -31,7 +31,7 @@ commands: #-co
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": "starting dbt / meltano installation, and project parse / compile...",
+                      "text": "starting dbt/meltano installation, and project parse/compile...",
                       "emoji": true
                     }
                   ]
@@ -70,14 +70,40 @@ commands: #-co
           command: cd dw && dbt compile <<parameters.compile-params>>
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "dbt/meltano installation, and project parse/compile succeeded!",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
           event: pass
-          template: basic_success_1
-          mentions: 'dbt / meltano installation, and project parse / compile succeeded!'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "dbt/meltano installation, and project parse/compile failed!",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
           event: fail
-          template: basic_fail_1
-          mentions: 'dbt / meltano installation, and project parse / compile failed!'
 
   extract-and-load-co:
     parameters:
@@ -96,7 +122,7 @@ commands: #-co
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": "starting meltano extract / load...",
+                      "text": "starting meltano extract/load...",
                       "emoji": true
                     }
                   ]
@@ -109,14 +135,40 @@ commands: #-co
           command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "meltano extract/load succeeded!",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
           event: pass
-          template: basic_success_1
-          mentions: 'meltano extract / load succeeded!'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "meltano extract/load failed!",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
           event: fail
-          template: basic_fail_1
-          mentions: 'meltano extract / load failed!'
 
   build-co:
     parameters:
@@ -148,14 +200,40 @@ commands: #-co
           command: cd dw && dbt build <<parameters.build-params>>
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "dbt transform succeeded!",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
           event: pass
-          template: basic_success_1
-          mentions: 'dbt transform succeeded!'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "dbt transform failed!",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
           event: fail
-          template: basic_fail_1
-          mentions: 'dbt transform failed!'
 
 jobs: #-jb
 
@@ -165,6 +243,14 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: ""
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
 
   dbt-sf-runner-daily-jb:
     docker:
@@ -176,6 +262,14 @@ jobs: #-jb
           run-params: ""
       - build-co:
           build-params: "--exclude tag:hold tag:pit"
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
 
   dbt-sf-runner-monthly-pit-jb:
     docker:
@@ -185,6 +279,14 @@ jobs: #-jb
           compile-params: ""
       - build-co:
           build-params: "--exclude tag:hold"
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
 
   dbt-sf-runner-test-jb:
     docker:
@@ -194,6 +296,14 @@ jobs: #-jb
           compile-params: "--target arc_test"
       - build-co:
           build-params: "--target arc_test << pipeline.parameters.dbt-vars >> --exclude tag:hold"
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
              
 workflows: #-wf
   version: 2
