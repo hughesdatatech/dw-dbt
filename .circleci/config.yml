@@ -62,9 +62,6 @@ commands: #-co
       - run:
           name: Install snowflake loader
           command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
-      #- run:
-          #name: Extract json data
-          #command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
       - run:
           name: Run dbt parse
           command: cd dw && dbt parse <<parameters.compile-params>>
@@ -82,10 +79,10 @@ commands: #-co
           template: basic_fail_1
           mentions: 'dbt / meltano installation, and project parse / compile failed!'
 
-  extract-load-co:
+  extract-and-load-co:
     parameters:
       run-params:
-        description: Optional arguments to be passed to the dbt build command
+        description: Optional arguments to be passed to the meltano run command
         default: "--exclude tag:hold tag:pit"
         type: string
     steps:
@@ -120,7 +117,7 @@ commands: #-co
           event: fail
           template: basic_fail_1
           mentions: 'meltano extract / load failed!'
-          
+
   build-co:
     parameters:
       build-params:
@@ -128,9 +125,37 @@ commands: #-co
         default: "--exclude tag:hold tag:pit"
         type: string
     steps:
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "starting dbt transform...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: always
       - run:
           name: Run dbt build
           command: cd dw && dbt build <<parameters.build-params>>
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+          mentions: 'dbt transform succeeded!'
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
+          mentions: 'dbt transform failed!'
 
 jobs: #-jb
 
@@ -147,6 +172,8 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: ""
+      - extract-and-load-co:
+          run-params: ""
       - build-co:
           build-params: "--exclude tag:hold tag:pit"
 
