@@ -79,11 +79,9 @@ models:
 snapshots:
   +pre-hook:
     sql: "{{ process_log_handler(component='snapshot', job_step='pre-hook') }}"
-    #transaction: false
   +post-hook:
     sql: "{{ process_log_handler(component='snapshot', job_step='post-hook') }}"
-    #transaction: false
-  talkspace:
+  dw:
     2_raw_vault:
       +tags: 
         - raw_vault

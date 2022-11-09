@@ -105,7 +105,7 @@ latest_key_stat as (
                 on latest_rv.rv_{{ model_key }}_hk = stg.rv_{{ model_key }}_hk
             left join latest_key_stat ls on
                 ls.rv___hk = latest_rv.rv_{{ model_key }}_hk
-                and ls.rec_source = 'rv_' + '{{ model_key }}'
+                and ls.rec_source = 'rv_' || '{{ model_key }}'
 
     )
     {% if not loop.last -%},{%- endif %}

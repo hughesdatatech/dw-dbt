@@ -12,7 +12,7 @@ rv_meta as (
     left join {{ ref('process_log_key_status_tracking') }} as stat_track
         on rv.rv_{{ alias }}_hk = stat_track.rv___hk
         and rv.rv_{{ alias }}_dbt_scd_id = stat_track.rv_dbt_scd_id
-        and 'rv_' + '{{ alias }}' = stat_track.rec_source
+        and 'rv_' || '{{ alias }}' = stat_track.rec_source
         and nvl(stat_track.rv_key_action, '') <> 'delete'
     where true
 
@@ -28,7 +28,7 @@ rv_meta as (
     inner join {{ ref('process_log_key_status_tracking') }} as stat_track
         on rv.rv_{{ alias }}_hk = stat_track.rv___hk
         and rv.rv_{{ alias }}_dbt_scd_id = stat_track.rv_dbt_scd_id
-        and 'rv_' + '{{ alias }}' = stat_track.rec_source
+        and 'rv_' || '{{ alias }}' = stat_track.rec_source
         and stat_track.rv_key_action = 'delete'
     where true
 

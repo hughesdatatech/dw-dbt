@@ -340,7 +340,7 @@ workflows: #-wf
     jobs:
       - dbt-sf-runner-monthly-pit-jb
 
-  # Test workflow (or manual trigger)
+  # Test scheduled workflow (or manual trigger)
   test-wf:
     when:
       or:
