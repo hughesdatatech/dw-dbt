@@ -62,9 +62,9 @@ commands: #-co
       - run:
           name: Install snowflake loader
           command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
-      - run:
-          name: Extract json data
-          command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
+      #- run:
+          #name: Extract json data
+          #command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
       - run:
           name: Run dbt parse
           command: cd dw && dbt parse <<parameters.compile-params>>
@@ -81,6 +81,7 @@ commands: #-co
           event: fail
           template: basic_fail_1
           mentions: 'dbt / meltano installation, and project parse / compile failed!'
+
   extract-load-co:
     parameters:
       run-params:
@@ -88,9 +89,38 @@ commands: #-co
         default: "--exclude tag:hold tag:pit"
         type: string
     steps:
+      - slack/notify:
+        channel: $SLACK_DEFAULT_CHANNEL
+        custom: |
+          {
+            "blocks": [
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "plain_text",
+                    "text": "starting meltano extract / load...",
+                    "emoji": true
+                  }
+                ]
+              }
+            ]
+          }
+        event: always
       - run:
           name: Extract json data
           command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+          mentions: 'meltano extract / load succeeded!'
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
+          mentions: 'meltano extract / load failed!'
+
   build-co:
     parameters:
       build-params:
@@ -103,54 +133,23 @@ commands: #-co
           command: cd dw && dbt build <<parameters.build-params>>
 
 jobs: #-jb
+
   setup-and-compile-jb:
     docker:
       - image: cimg/python:3.9.7
     steps:
       - setup-and-compile-co:
           compile-params: ""
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: pass
-          template: basic_success_1
-          mentions: 'Setup and compile success!'
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1
-          mentions: 'Setup and compile fail!'
-  dbt-sf-runner-test-jb:
-    docker:
-      - image: cimg/python:3.9.7
-    steps:
-      - setup-and-compile-co:
-          compile-params: "--target arc_test"
-      - build-co:
-          build-params: "--target arc_test << pipeline.parameters.dbt-vars >> --exclude tag:hold"
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: pass
-          template: basic_success_1
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1
+
   dbt-sf-runner-daily-jb:
     docker:
       - image: cimg/python:3.9.7
     steps:
-      #- setup-and-compile-co:
-          #compile-params: ""
+      - setup-and-compile-co:
+          compile-params: ""
       - build-co:
           build-params: "--exclude tag:hold tag:pit"
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: pass
-          template: basic_success_1
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1
+
   dbt-sf-runner-monthly-pit-jb:
     docker:
       - image: cimg/python:3.9.7
@@ -159,17 +158,19 @@ jobs: #-jb
           compile-params: ""
       - build-co:
           build-params: "--exclude tag:hold"
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: pass
-          template: basic_success_1
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1
+
+  dbt-sf-runner-test-jb:
+    docker:
+      - image: cimg/python:3.9.7
+    steps:
+      - setup-and-compile-co:
+          compile-params: "--target arc_test"
+      - build-co:
+          build-params: "--target arc_test << pipeline.parameters.dbt-vars >> --exclude tag:hold"
              
 workflows: #-wf
   version: 2
+
   # Setup and compile workflow, triggered upon push to main or development (or manual trigger)
   setup-and-compile-wf:
     when:
@@ -183,6 +184,7 @@ workflows: #-wf
               only: 
                 - main
                 - development
+
   # Daily scheduled workflow for the entire pipeline, excluding monthly PIT tables (or manual trigger)
   scheduled-pipeline-daily-wf: 
     when:
@@ -190,10 +192,8 @@ workflows: #-wf
         - equal: [ "dbt-sf-runner-daily", << pipeline.parameters.manual-trigger-pp >> ]
         - equal: [ "dbt-sf-runner-daily", << pipeline.schedule.name >> ]
     jobs:
-      - setup-and-compile-jb
-      - dbt-sf-runner-daily-jb:
-          requires:
-            - setup-and-compile-jb
+      - dbt-sf-runner-daily-jb
+
   # Monthly scheduled workflow for the entire pipeline, including PIT tables (or manual trigger)
   scheduled-pipeline-monthly-pit-wf:
     when:
@@ -202,6 +202,7 @@ workflows: #-wf
         - equal: [ "dbt-sf-runner-monthly-pit", << pipeline.schedule.name >> ]
     jobs:
       - dbt-sf-runner-monthly-pit-jb
+
   # Test workflow (or manual trigger)
   test-wf:
     when:
