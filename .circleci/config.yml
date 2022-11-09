@@ -31,7 +31,7 @@ commands: #-co
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": "Setup and compile start...",
+                      "text": "starting dbt / meltano installation, and project parse / compile...",
                       "emoji": true
                     }
                   ]
@@ -48,29 +48,39 @@ commands: #-co
             mv .circleci/requirements.txt  ~/.dbt/requirements.txt
       - python/install-packages:
           pkg-manager: pip
-          app-dir: ~/.dbt/  # If you're requirements.txt isn't in the root directory.
+          app-dir: ~/.dbt/  # if your requirements.txt isn't in the root directory.
           # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements. 
       - run:
           name: Run dbt deps
           command: cd dw && dbt deps
-      #- run:
-          #name: Install meltano
-          #command: pipx install "meltano"
-      #- run:
-          #name: Install rest api extractor
-          #command: cd dw-meltano/dw-ownbackup && meltano install extractor tap-rest-api-msdk
-      #- run:
-          #name: Install snowflake loader
-          #command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
-      #- run:
-          #name: Extract json data
-          #command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
-      #- run:
-          #name: Run dbt parse
-          #command: cd dw && dbt parse <<parameters.compile-params>>
-      #- run:
-          #name: Run dbt compile
-          #command: cd dw && dbt compile <<parameters.compile-params>>
+      - run:
+          name: Install meltano
+          command: pipx install "meltano"
+      - run:
+          name: Install rest api extractor
+          command: cd dw-meltano/dw-ownbackup && meltano install extractor tap-rest-api-msdk
+      - run:
+          name: Install snowflake loader
+          command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
+      - run:
+          name: Extract json data
+          command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
+      - run:
+          name: Run dbt parse
+          command: cd dw && dbt parse <<parameters.compile-params>>
+      - run:
+          name: Run dbt compile
+          command: cd dw && dbt compile <<parameters.compile-params>>
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+          mentions: 'dbt / meltano installation, and project parse / compile succeeded!'
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
+          mentions: 'dbt / meltano installation, and project parse / compile failed!'
   extract-load-co:
     parameters:
       run-params:
@@ -160,6 +170,7 @@ jobs: #-jb
              
 workflows: #-wf
   version: 2
+  # Setup and compile workflow, triggered upon push to main or development (or manual trigger)
   setup-and-compile-wf:
     when:
       or:
@@ -172,15 +183,8 @@ workflows: #-wf
               only: 
                 - main
                 - development
-  test-wf:
-    when:
-      or:
-        - equal: [ "dbt-sf-runner-test", << pipeline.parameters.manual-trigger-pp >> ]
-        - equal: [ "dbt-sf-runner-test", << pipeline.schedule.name >> ]
-    jobs:
-      - dbt-sf-runner-test-jb
-      #- dbt-sf-runner-daily-jb
-  scheduled-pipeline-daily-wf:
+  # Daily scheduled workflow for the entire pipeline, excluding monthly PIT tables (or manual trigger)
+  scheduled-pipeline-daily-wf: 
     when:
       or:
         - equal: [ "dbt-sf-runner-daily", << pipeline.parameters.manual-trigger-pp >> ]
@@ -190,6 +194,7 @@ workflows: #-wf
       - dbt-sf-runner-daily-jb:
           requires:
             - setup-and-compile-jb
+  # Monthly scheduled workflow for the entire pipeline, including PIT tables (or manual trigger)
   scheduled-pipeline-monthly-pit-wf:
     when:
       or:
@@ -197,4 +202,12 @@ workflows: #-wf
         - equal: [ "dbt-sf-runner-monthly-pit", << pipeline.schedule.name >> ]
     jobs:
       - dbt-sf-runner-monthly-pit-jb
+  # Test workflow (or manual trigger)
+  test-wf:
+    when:
+      or:
+        - equal: [ "dbt-sf-runner-test", << pipeline.parameters.manual-trigger-pp >> ]
+        - equal: [ "dbt-sf-runner-test", << pipeline.schedule.name >> ]
+    jobs:
+      - dbt-sf-runner-test-jb
   
