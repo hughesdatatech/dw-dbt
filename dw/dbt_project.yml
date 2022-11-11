@@ -156,7 +156,7 @@ vars:
   # dbt run --vars 'test_row_limit: 1' --select tag:staging
   test_row_limit: 0
 
-  pipeline_metadata: 'null'
+  pipeline_key: 'null'
   pipeline_project_metadata: 'null'
   pipeline_schedule_metadata: 'null'
 

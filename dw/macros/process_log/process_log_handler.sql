@@ -6,7 +6,7 @@
 
             create table if not exists {{ target.schema }}.{{ var('process_log') }} (
                 process_log_id integer identity(1, 1),
-                pipeline_metadata varchar,
+                pipeline_key varchar,
                 pipeline_project_metadata varchar,
                 pipeline_schedule_metadata varchar,
                 job_id varchar(500),  
@@ -56,7 +56,7 @@
     {%- set insert_query -%}
 
         insert into {{ target.schema }}.{{ var('process_log') }} (
-            pipeline_metadata,
+            pipeline_key,
             pipeline_project_metadata,
             pipeline_schedule_metadata,
             job_id, 
@@ -70,7 +70,7 @@
             inserted_at
         ) 
         values(
-            '{{ var("pipeline_metadata") }}',
+            '{{ var("pipeline_key") }}',
             '{{ var("pipeline_project_metadata") }}',
             '{{ var("pipeline_schedule_metadata") }}',
             '{{ invocation_id }}', 

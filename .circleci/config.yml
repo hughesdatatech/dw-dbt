@@ -18,7 +18,7 @@ parameters: #-pp
   dbt-metadata-vars:
     type: string
     default: >
-      pipeline_metadata: << pipeline.id >> | << pipeline.number >>,
+      pipeline_key: << pipeline.id >> | << pipeline.number >>,
       pipeline_project_metadata: << pipeline.project.git_url >> | << pipeline.project.type >> | << pipeline.git.tag >> | << pipeline.git.branch >> | << pipeline.git.revision >> | << pipeline.git.base_revision >>,
       pipeline_schedule_metadata: << pipeline.in_setup >> | << pipeline.trigger_source >> | << pipeline.schedule.name >> | << pipeline.schedule.id >>
 
@@ -141,7 +141,7 @@ commands: #-co
             }
           event: always
       - run:
-          name: Extract json data
+          name: Extract/load json data
           command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
@@ -290,8 +290,22 @@ jobs: #-jb
             << pipeline.parameters.dbt-metadata-vars >>,
             object_identifier_override: << pipeline.id >> | << pipeline.number >>
             }'
+      - log-pipeline-action-co:
+          run-params: >
+            --args '{object_type: meltano_project, event_name: log_pipeline_action, sequence_description: on_run_start}' 
+            --vars '{ 
+            << pipeline.parameters.dbt-metadata-vars >>,
+            object_identifier_override: dw-meltano
+            }'
       - extract-and-load-co:
           run-params: ""
+      - log-pipeline-action-co:
+          run-params: >
+            --args '{object_type: meltano_project, event_name: log_pipeline_action, sequence_description: on_run_end}' 
+            --vars '{ 
+            << pipeline.parameters.dbt-metadata-vars >>,
+            object_identifier_override: dw-meltano
+            }'
       - dbt-build-co:
           build-params: >
             --exclude tag:demo tag:pit 
