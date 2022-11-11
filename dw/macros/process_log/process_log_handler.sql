@@ -1,6 +1,6 @@
-{% macro process_log_handler(component='unknown', job_step='unknown') %}
+{% macro process_log_handler(object_type='dbt_project', event_name='unknown', sequence_description='unknown') %}
 
-    {%- if job_step == 'on-run-start' or job_step == 'on-run-end' -%}
+    {%- if sequence_description == 'on-run-start' or sequence_description == 'on-run-end' -%}
 
         {%- set create_query -%}
 
@@ -8,11 +8,13 @@
                 pipeline_metadata varchar,
                 pipeline_project_metadata varchar,
                 pipeline_schedule_metadata varchar,
-                job_id varchar(500), 
-                job_step_component varchar(500), 
-                job_step varchar(1000), 
-                job_step_info1 varchar, 
-                job_step_info2 varchar,
+                job_id varchar(500),  
+                object_type varchar(100),
+                object_identifier varchar(200),
+                event_name varchar(100),
+                sequence_description varchar(100),
+                log_info1 varchar, 
+                log_info2 varchar,
                 loaded_at timestamp, 
                 inserted_at timestamp
             )
@@ -29,6 +31,27 @@
 
     {%- endif -%}
 
+     {%- if var('object_type_override') != 'null' -%}
+        {%- set object_type = var('object_type_override') -%}
+    {%- endif -%}
+
+    {%- set object_identifier = 'unknown' -%}
+    {%- if object_type == 'dbt_project' -%}
+        {%- set object_identifier = project_name -%}
+    {%- elif object_type == 'model' or object_type == 'snapshot' -%}
+        {%- set object_identifier = this -%}
+    {%- elif object_type == 'pipeline' -%}
+        {%- set object_identifier = var('object_identifier_override') -%}
+    {%- endif -%}
+
+    {%- if var('event_name_override') != 'null' -%}
+        {%- set event_name = var('event_name_override') -%}
+    {%- endif -%}
+
+    {%- if var('sequence_description_override') != 'null' -%}
+        {%- set sequence_description = var('sequence_description_override') -%}
+    {%- endif -%}
+
     {%- set insert_query -%}
 
         insert into {{ target.schema }}.{{ var('process_log') }} (
@@ -36,10 +59,12 @@
             pipeline_project_metadata,
             pipeline_schedule_metadata,
             job_id, 
-            job_step_component, 
-            job_step, 
-            job_step_info1,
-            job_step_info2,
+            object_type,
+            object_identifier,
+            event_name,
+            sequence_description,
+            log_info1,
+            log_info2,
             loaded_at, 
             inserted_at
         ) 
@@ -48,10 +73,12 @@
             '{{ var("pipeline_project_metadata") }}',
             '{{ var("pipeline_schedule_metadata") }}',
             '{{ invocation_id }}', 
-            {{ "'dbt project: " + project_name + "'" if component == 'job' or component == 'pipeline' else remove_double_quotes(this) }},
-            '{{ component + ": " + job_step }}',
+            '{{ object_type }}',
+            '{{ object_identifier }}',
+            '{{ event_name }}',
+            '{{ sequence_description }}',
             {{ "'dbt version: " + dbt_version + "'" }},
-            {{ "'clean_all_objects: complete'" if var("run_key") == var("clean_all_objects_key") else 'null' }},
+            null,
             {{ build_loaded_at('null') }}, 
             {{ build_inserted_at('null') }}
         )

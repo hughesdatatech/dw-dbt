@@ -11,14 +11,16 @@ parameters: #-pp
   dbt-test-vars:
     type: string
     default: "--vars 'test_row_limit: 10'"
+  dbt-compile-vars:
+    type: string
+    default: >
+      event_name: pipeline compile
   dbt-metadata-vars:
     type: string
     default: >
-      --vars '{
       pipeline_metadata: << pipeline.id >> | << pipeline.number >>,
       pipeline_project_metadata: << pipeline.project.git_url >> | << pipeline.project.type >> | << pipeline.git.tag >> | << pipeline.git.branch >> | << pipeline.git.revision >> | << pipeline.git.base_revision >>,
       pipeline_schedule_metadata: << pipeline.in_setup >> | << pipeline.trigger_source >> | << pipeline.schedule.name >> | << pipeline.schedule.id >>
-      }'
 
 commands: #-co
   setup-and-compile-co:
@@ -277,22 +279,30 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: >
-            --args '{component: pipeline, job_step: compile}' 
-            << pipeline.parameters.dbt-metadata-vars >>
+            --vars '{
+            << pipeline.parameters.dbt-metadata-vars >>,
+            << pipeline.parameters.dbt-compile-vars >>
+            }'
       - log-pipeline-action-co:
           run-params: >
-            --args '{component: pipeline, job_step: on-run-start}' 
+            --args '{object_type: pipeline, event_name: log pipeline action, sequence_description: on-run-start}' 
+            --vars '{ 
             << pipeline.parameters.dbt-metadata-vars >>
+            }'
       - extract-and-load-co:
           run-params: ""
       - dbt-build-co:
           build-params: >
             --exclude tag:demo tag:pit 
+            --vars '{ 
             << pipeline.parameters.dbt-metadata-vars >>
+            }'
       - log-pipeline-action-co:
           run-params: >
-            --args '{component: pipeline, job_step: on-run-end}' 
+            --args '{object_type: pipeline, event_name: log pipeline action, sequence_description: on-run-end}' 
+            --vars '{ 
             << pipeline.parameters.dbt-metadata-vars >>
+            }'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
