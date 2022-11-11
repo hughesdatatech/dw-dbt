@@ -269,6 +269,8 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: ""
+      - log-pipeline-action-co:
+          run-params: ""
       - extract-and-load-co:
           run-params: ""
       - build-co:
