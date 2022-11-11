@@ -32,17 +32,17 @@
 
     {%- endif -%}
 
-     {%- if var('object_type_override') != 'null' -%}
+    {%- if var('object_type_override') != 'null' -%}
         {%- set object_type = var('object_type_override') -%}
     {%- endif -%}
 
     {%- set object_identifier = 'unknown' -%}
-    {%- if object_type == 'dbt_project' -%}
+    {%- if var('object_identifier_override') != 'null' -%}
+        {%- set object_identifier = var('object_identifier_override') -%}
+    {%- elif object_type == 'dbt_project' -%}
         {%- set object_identifier = project_name -%}
     {%- elif object_type == 'model' or object_type == 'snapshot' -%}
         {%- set object_identifier = this -%}
-    {%- elif object_type == 'pipeline' -%}
-        {%- set object_identifier = var('object_identifier_override') -%}
     {%- endif -%}
 
     {%- if var('event_name_override') != 'null' -%}
