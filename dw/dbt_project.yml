@@ -24,7 +24,7 @@ clean-targets: # Directories to be removed by `dbt clean`.
   - "target"
   - "dbt_packages"
 
-on-run-start: "{{ process_log_handler(component='job', job_step='on-run-start') }}"
+on-run-start: "{{ process_log_handler(component='job', job_step='on-run-start', build_env_metadata1=var('build_env_metadata1'), build_env_metadata2=var('build_env_metadata2')) }}"
 on-run-end: "{{ process_log_handler(component='job', job_step='on-run-end') }}"
 
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
@@ -101,7 +101,12 @@ snapshots:
     2_raw_vault:
       demo_schema:
         +tags: demo
-        
+
+seeds:
+  dw:
+    0_reference_data:
+      +tags: demo
+    
 vars:
   "dbt_date:time_zone": "UTC"
 
@@ -150,6 +155,10 @@ vars:
   # Set to a number > 0 to limit the number of rows returned in all staging models.
   # dbt run --vars 'test_row_limit: 1' --select tag:staging
   test_row_limit: 0
+
+  build_env_metadata1: 'null'
+
+  build_env_metadata2: 'null'
 
   run_key: 0
 

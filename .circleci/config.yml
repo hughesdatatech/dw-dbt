@@ -261,7 +261,7 @@ jobs: #-jb
       - extract-and-load-co:
           run-params: ""
       - build-co:
-          build-params: "--exclude tag:demo tag:pit"
+          build-params: "--exclude tag:demo tag:pit --vars 'build_env_metadata1: $CIRCLE_BUILD_URL'"
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
@@ -319,7 +319,7 @@ workflows: #-wf
           filters:
             branches:
               only: 
-                - main
+                #- main
                 - development
 
   # Daily scheduled workflow for the entire pipeline, excluding monthly PIT tables (or manual trigger)

@@ -1,4 +1,4 @@
-{% macro process_log_handler(component='unknown', job_step='unknown') %}
+{% macro process_log_handler(component='unknown', job_step='unknown', build_env_metadata1='null', build_env_metadata2='null') %}
 
     {%- if job_step == 'on-run-start' or job_step == 'on-run-end' -%}
 
@@ -8,8 +8,10 @@
                 job_id varchar(500), 
                 job_step_component varchar(500), 
                 job_step varchar(1000), 
-                job_step_add_info1 varchar, 
-                job_step_add_info2 varchar, 
+                job_step_info1 varchar, 
+                job_step_info2 varchar,
+                build_env_metadata1 varchar,
+                build_env_metadata2 varchar, 
                 loaded_at timestamp, 
                 inserted_at timestamp
             )
@@ -32,8 +34,10 @@
             job_id, 
             job_step_component, 
             job_step, 
-            job_step_add_info1,
-            job_step_add_info2,
+            job_step_info1,
+            job_step_info2,
+            build_env_metadata1,
+            build_env_metadata2,
             loaded_at, 
             inserted_at
         ) 
@@ -43,6 +47,8 @@
             '{{ component + ": " + job_step }}',
             {{ "'dbt version: " + dbt_version + "'" if component == 'job' else 'null' }},
             {{ "'clean_all_objects: complete'" if var("run_key") == var("clean_all_objects_key") else 'null' }},
+            '{{ build_env_metadata1 }}',
+            '{{ build_env_metadata2 }}',
             {{ build_loaded_at('null') }}, 
             {{ build_inserted_at('null') }}
         )

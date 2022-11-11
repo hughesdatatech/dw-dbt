@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: im_demo_concept
-  - name: im_demo_concept_hist
-  - name: im_demo_concept_pit
-  - name: vim_demo_concept
+  - name: im_concept_name
+  - name: im_concept_name_hist
+  - name: im_concept_name_pit
+  - name: vim_concept_name
