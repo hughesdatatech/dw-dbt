@@ -170,6 +170,17 @@ commands: #-co
             }
           event: fail
 
+  log-pipeline-action-co:
+    parameters:
+      run-params:
+        description: Optional arguments to be passed to the dbt run-operation command
+        default: ""
+        type: string
+    steps:
+      - run:
+          name: Run dbt run-operation
+          command: cd dw && dbt run-operation <<parameters.run-params>>
+      
   build-co:
     parameters:
       build-params:
