@@ -24,16 +24,16 @@ clean-targets: # Directories to be removed by `dbt clean`.
   - "target"
   - "dbt_packages"
 
-on-run-start: "{{ process_log_handler(object_type='dbt_project', event_name='execute', sequence_description='on-run-start') }}"
-on-run-end: "{{ process_log_handler(object_type='dbt_project', event_name='execute', sequence_description='on-run-end') }}"
+on-run-start: "{{ process_log_handler(object_type='dbt_project', event_name='execute', sequence_description='on_run_start') }}"
+on-run-end: "{{ process_log_handler(object_type='dbt_project', event_name='execute', sequence_description='on_run_end') }}"
 
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
 models:
   +pre-hook:
-    sql: "{{ process_log_handler(object_type='model', event_name='execute', sequence_description='pre-hook') }}"
+    sql: "{{ process_log_handler(object_type='model', event_name='execute', sequence_description='pre_hook') }}"
     #transaction: false
   +post-hook:
-    sql: "{{ process_log_handler(object_type='model', event_name='execute', sequence_description='post-hook') }}"
+    sql: "{{ process_log_handler(object_type='model', event_name='execute', sequence_description='post_hook') }}"
     #transaction: false
   dw:
     +bind: false # Late-binding views so DMS can drop and recreate underlying tables.
@@ -94,9 +94,9 @@ models:
 
 snapshots:
   +pre-hook:
-    sql: "{{ process_log_handler(object_type='snapshot', event_name='execute', sequence_description='pre-hook') }}"
+    sql: "{{ process_log_handler(object_type='snapshot', event_name='execute', sequence_description='pre_hook') }}"
   +post-hook:
-    sql: "{{ process_log_handler(object_type='snapshot', event_name='execute', sequence_description='post-hook') }}"
+    sql: "{{ process_log_handler(object_type='snapshot', event_name='execute', sequence_description='post_hook') }}"
   dw:
     2_raw_vault:
       demo_schema:

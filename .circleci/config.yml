@@ -14,7 +14,7 @@ parameters: #-pp
   dbt-compile-vars:
     type: string
     default: >
-      event_name: pipeline compile
+      event_name_override: pipeline compile
   dbt-metadata-vars:
     type: string
     default: >
@@ -285,9 +285,10 @@ jobs: #-jb
             }'
       - log-pipeline-action-co:
           run-params: >
-            --args '{object_type: pipeline, event_name: log pipeline action, sequence_description: on-run-start}' 
+            --args '{object_type: pipeline, event_name: log_pipeline_action, sequence_description: on_run_start}' 
             --vars '{ 
-            << pipeline.parameters.dbt-metadata-vars >>
+            << pipeline.parameters.dbt-metadata-vars >>,
+            object_identifier_override: pipeline_metadata: << pipeline.id >> | << pipeline.number >>
             }'
       - extract-and-load-co:
           run-params: ""
@@ -299,9 +300,10 @@ jobs: #-jb
             }'
       - log-pipeline-action-co:
           run-params: >
-            --args '{object_type: pipeline, event_name: log pipeline action, sequence_description: on-run-end}' 
+            --args '{object_type: pipeline, event_name: log_pipeline_action, sequence_description: on_run_end}' 
             --vars '{ 
-            << pipeline.parameters.dbt-metadata-vars >>
+            << pipeline.parameters.dbt-metadata-vars >>,
+            object_identifier_override: pipeline_metadata: << pipeline.id >> | << pipeline.number >>
             }'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL

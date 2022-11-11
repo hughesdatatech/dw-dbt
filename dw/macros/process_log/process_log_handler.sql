@@ -1,6 +1,6 @@
 {% macro process_log_handler(object_type='dbt_project', event_name='unknown', sequence_description='unknown') %}
 
-    {%- if sequence_description == 'on-run-start' or sequence_description == 'on-run-end' -%}
+    {%- if sequence_description == 'on_run_start' or sequence_description == 'on_run_end' -%}
 
         {%- set create_query -%}
 
@@ -77,7 +77,7 @@
             '{{ object_identifier }}',
             '{{ event_name }}',
             '{{ sequence_description }}',
-            {{ "'dbt version: " + dbt_version + "'" }},
+            {{ "'dbt_version: " + dbt_version + "'" }},
             null,
             {{ build_loaded_at('null') }}, 
             {{ build_inserted_at('null') }}
