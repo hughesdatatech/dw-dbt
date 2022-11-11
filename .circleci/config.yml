@@ -8,9 +8,17 @@ parameters: #-pp
   manual-trigger-pp:
     type: string
     default: ""
-  dbt-vars:
+  dbt-test-vars:
     type: string
     default: "--vars 'test_row_limit: 10'"
+  dbt-metadata-vars:
+    type: string
+    default: >
+      --vars '{
+      pipeline_metadata: << pipeline.id >> | << pipeline.number >>,
+      pipeline_project_metadata: << pipeline.project.git_url >> | << pipeline.project.type >> | << pipeline.git.tag >> | << pipeline.git.branch >> | << pipeline.git.revision >> | << pipeline.git.base_revision >>,
+      pipeline_schedule_metadata: << pipeline.in_setup >> | << pipeline.trigger_source >> | << pipeline.schedule.name >> | << pipeline.schedule.id >>
+      }'
 
 commands: #-co
   setup-and-compile-co:
@@ -318,7 +326,7 @@ jobs: #-jb
       - setup-and-compile-co:
           compile-params: "--target arc_test"
       - build-co:
-          build-params: "--target arc_test << pipeline.parameters.dbt-vars >> --exclude tag:demo"
+          build-params: "--target arc_test << pipeline.parameters.dbt-test-vars >> --exclude tag:demo"
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
