@@ -269,7 +269,7 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: ""
-      - log-pipeline-action-co:  >
+      - log-pipeline-action-co: >
             --args '{component: pipeline, job_step: on-run-start}' --vars '{
             pipeline_metadata: << pipeline.id >> | << pipeline.number >>,
             pipeline_project_metadata: << pipeline.project.git_url >> | << pipeline.project.type >> | << pipeline.git.tag >> | << pipeline.git.branch >> | << pipeline.git.revision >> | << pipeline.git.base_revision >>,
