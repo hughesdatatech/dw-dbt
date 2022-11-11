@@ -279,11 +279,8 @@ jobs: #-jb
           compile-params: ""
       - log-pipeline-action-co:
           run-params: >
-            --args '{component: pipeline, job_step: on-run-start}' --vars '{
-            pipeline_metadata: << pipeline.id >> | << pipeline.number >>,
-            pipeline_project_metadata: << pipeline.project.git_url >> | << pipeline.project.type >> | << pipeline.git.tag >> | << pipeline.git.branch >> | << pipeline.git.revision >> | << pipeline.git.base_revision >>,
-            pipeline_schedule_metadata: << pipeline.in_setup >> | << pipeline.trigger_source >> | << pipeline.schedule.name >> | << pipeline.schedule.id >>
-            }'
+            --args '{component: pipeline, job_step: on-run-start}' 
+            << pipeline.parameters.dbt-metadata-vars >>
       - extract-and-load-co:
           run-params: ""
       - build-co:
