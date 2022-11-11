@@ -5,6 +5,7 @@
         {%- set create_query -%}
 
             create table if not exists {{ target.schema }}.{{ var('process_log') }} (
+                process_log_id integer identity(1, 1),
                 pipeline_metadata varchar,
                 pipeline_project_metadata varchar,
                 pipeline_schedule_metadata varchar,

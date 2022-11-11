@@ -14,7 +14,7 @@ parameters: #-pp
   dbt-compile-vars:
     type: string
     default: >
-      event_name_override: pipeline compile
+      event_name_override: pipeline_compile
   dbt-metadata-vars:
     type: string
     default: >
