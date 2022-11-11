@@ -105,10 +105,21 @@ commands: #-co
             }
           event: fail
 
-  extract-and-load-co:
+  log-pipeline-action-co:
     parameters:
       run-params:
-        description: Optional arguments to be passed to the meltano run command
+        description: Optional arguments to be passed to the dbt run-operation command
+        default: ""
+        type: string
+    steps:
+       - run:
+          name: Log pipeline action
+          command: cd dw && dbt run-operation <<parameters.run-params>>
+      
+  build-co:
+    parameters:
+      build-params:
+        description: Optional arguments to be passed to the dbt build command
         default: "--exclude tag:demo tag:pit"
         type: string
     steps:
@@ -122,7 +133,7 @@ commands: #-co
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": "starting meltano extract/load...",
+                      "text": "starting dbt transform...",
                       "emoji": true
                     }
                   ]
@@ -131,8 +142,8 @@ commands: #-co
             }
           event: always
       - run:
-          name: Extract json data
-          command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
+          name: Run dbt build
+          command: cd dw && dbt build <<parameters.build-params>>
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           custom: |
@@ -143,7 +154,7 @@ commands: #-co
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": "meltano extract/load succeeded!",
+                      "text": "dbt transform succeeded!",
                       "emoji": true
                     }
                   ]
@@ -161,7 +172,7 @@ commands: #-co
                   "fields": [
                     {
                       "type": "plain_text",
-                      "text": "meltano extract/load failed!",
+                      "text": "dbt transform failed!",
                       "emoji": true
                     }
                   ]
@@ -169,6 +180,7 @@ commands: #-co
               ]
             }
           event: fail
+
 
   build-co:
     parameters:
@@ -258,6 +270,9 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: ""
+      - log-pipeline-action-co:
+          run-params: >
+            --args '{component: pipeline, job_step: on-run-start}'
       - extract-and-load-co:
           run-params: ""
       - build-co:
@@ -267,7 +282,9 @@ jobs: #-jb
             pipeline_project_metadata: << pipeline.project.git_url >> | << pipeline.project.type >> | << pipeline.git.tag >> | << pipeline.git.branch >> | << pipeline.git.revision >> | << pipeline.git.base_revision >>,
             pipeline_schedule_metadata: << pipeline.in_setup >> | << pipeline.trigger_source >> | << pipeline.schedule.name >> | << pipeline.schedule.id >>
             }'
-
+      - log-pipeline-action-co:
+          run-params: >
+            --args '{component: pipeline, job_step: on-run-end}'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass

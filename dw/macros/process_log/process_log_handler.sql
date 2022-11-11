@@ -48,9 +48,9 @@
             '{{ var("pipeline_project_metadata") }}',
             '{{ var("pipeline_schedule_metadata") }}',
             '{{ invocation_id }}', 
-            {{ "'dbt project: " + project_name + "'" if component == 'job' else remove_double_quotes(this) }},
+            {{ "'dbt project: " + project_name + "'" if component == 'job' or component == 'pipeline' else remove_double_quotes(this) }},
             '{{ component + ": " + job_step }}',
-            {{ "'dbt version: " + dbt_version + "'" if component == 'job' else 'null' }},
+            {{ "'dbt version: " + dbt_version + "'" }},
             {{ "'clean_all_objects: complete'" if var("run_key") == var("clean_all_objects_key") else 'null' }},
             {{ build_loaded_at('null') }}, 
             {{ build_inserted_at('null') }}
