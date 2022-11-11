@@ -262,9 +262,9 @@ jobs: #-jb
           run-params: ""
       - build-co:
           build-params: >
-            "--exclude tag:demo tag:pit --vars '{pipeline_metadata: << pipeline.id >> | << pipeline.number >>,
+            --exclude tag:demo tag:pit --vars '{pipeline_metadata: << pipeline.id >> | << pipeline.number >>,
             pipeline_project_metadata: << pipeline.project.git_url >>,
-            pipeline_schedule_metadata: << pipeline.in_setup >>}'"
+            pipeline_schedule_metadata: << pipeline.in_setup >>}'
 
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
