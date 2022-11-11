@@ -40,12 +40,25 @@ models:
     1_staging:
       +materialized: table
       demo_source: # application name
+        +tags: demo
         demo_schema: # schema name
     3_business_rule:
       +materialized: view
+      demo_source: # application name
+        +tags: demo
     4_info_mart:
       +materialized: table
       subject_area:
+        +materialized: view
+        +tags: demo
+        current:
+          +materialized: table
+        historical:
+          +materialized: incremental
+        point_in_time:
+          +tags: pit
+          +materialized: incremental
+      opioid_stay:
         +materialized: view
         current:
           +materialized: table
@@ -56,8 +69,11 @@ models:
           +materialized: incremental
     5_metrics_rule:
       +materialized: view
+      subject_area:
+        +tags: demo
     6_metrics_mart:
       subject_area:
+        +tags: demo
         +materialized: view
         current:
           +materialized: table
@@ -83,9 +99,9 @@ snapshots:
     sql: "{{ process_log_handler(component='snapshot', job_step='post-hook') }}"
   dw:
     2_raw_vault:
-      +tags: 
-        - raw_vault
-
+      demo_schema:
+        +tags: demo
+        
 vars:
   "dbt_date:time_zone": "UTC"
 

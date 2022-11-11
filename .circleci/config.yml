@@ -109,7 +109,7 @@ commands: #-co
     parameters:
       run-params:
         description: Optional arguments to be passed to the meltano run command
-        default: "--exclude tag:hold tag:pit"
+        default: "--exclude tag:demo tag:pit"
         type: string
     steps:
       - slack/notify:
@@ -174,7 +174,7 @@ commands: #-co
     parameters:
       build-params:
         description: Optional arguments to be passed to the dbt build command
-        default: "--exclude tag:hold tag:pit"
+        default: "--exclude tag:demo tag:pit"
         type: string
     steps:
       - slack/notify:
@@ -261,7 +261,7 @@ jobs: #-jb
       - extract-and-load-co:
           run-params: ""
       - build-co:
-          build-params: "--exclude tag:hold tag:pit"
+          build-params: "--exclude tag:demo tag:pit"
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
@@ -278,7 +278,7 @@ jobs: #-jb
       - setup-and-compile-co:
           compile-params: ""
       - build-co:
-          build-params: "--exclude tag:hold"
+          build-params: "--exclude tag:demo"
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
@@ -295,7 +295,7 @@ jobs: #-jb
       - setup-and-compile-co:
           compile-params: "--target arc_test"
       - build-co:
-          build-params: "--target arc_test << pipeline.parameters.dbt-vars >> --exclude tag:hold"
+          build-params: "--target arc_test << pipeline.parameters.dbt-vars >> --exclude tag:demo"
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
