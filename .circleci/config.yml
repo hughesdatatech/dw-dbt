@@ -288,7 +288,7 @@ jobs: #-jb
             --args '{object_type: pipeline, event_name: log_pipeline_action, sequence_description: on_run_start}' 
             --vars '{ 
             << pipeline.parameters.dbt-metadata-vars >>,
-            object_identifier_override: pipeline_metadata: << pipeline.id >> | << pipeline.number >>
+            object_identifier_override: << pipeline.id >> | << pipeline.number >>
             }'
       - extract-and-load-co:
           run-params: ""
@@ -303,7 +303,7 @@ jobs: #-jb
             --args '{object_type: pipeline, event_name: log_pipeline_action, sequence_description: on_run_end}' 
             --vars '{ 
             << pipeline.parameters.dbt-metadata-vars >>,
-            object_identifier_override: pipeline_metadata: << pipeline.id >> | << pipeline.number >>
+            object_identifier_override: << pipeline.id >> | << pipeline.number >>
             }'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
