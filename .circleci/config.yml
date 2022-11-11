@@ -285,11 +285,8 @@ jobs: #-jb
           run-params: ""
       - build-co:
           build-params: >
-            --exclude tag:demo tag:pit --vars '{
-            pipeline_metadata: << pipeline.id >> | << pipeline.number >>,
-            pipeline_project_metadata: << pipeline.project.git_url >> | << pipeline.project.type >> | << pipeline.git.tag >> | << pipeline.git.branch >> | << pipeline.git.revision >> | << pipeline.git.base_revision >>,
-            pipeline_schedule_metadata: << pipeline.in_setup >> | << pipeline.trigger_source >> | << pipeline.schedule.name >> | << pipeline.schedule.id >>
-            }'
+            --exclude tag:demo tag:pit 
+            << pipeline.parameters.dbt-metadata-vars >>
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
