@@ -72,7 +72,7 @@ commands: #-co
           command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
       - run:
           name: Run dbt parse
-          command: cd dw && dbt parse <<parameters.compile-params>>
+          command: cd dw && dbt parse
       - run:
           name: Run dbt compile
           command: cd dw && dbt compile <<parameters.compile-params>>
@@ -189,7 +189,7 @@ commands: #-co
           name: Run dbt run-operation
           command: cd dw && dbt run-operation process_log_handler <<parameters.run-params>>
       
-  build-co:
+  dbt-build-co:
     parameters:
       build-params:
         description: Optional arguments to be passed to the dbt build command
@@ -276,16 +276,22 @@ jobs: #-jb
       - image: cimg/python:3.9.7
     steps:
       - setup-and-compile-co:
-          compile-params: ""
+          compile-params: >
+            --args '{component: pipeline, job_step: compile}' 
+            << pipeline.parameters.dbt-metadata-vars >>
       - log-pipeline-action-co:
           run-params: >
             --args '{component: pipeline, job_step: on-run-start}' 
             << pipeline.parameters.dbt-metadata-vars >>
       - extract-and-load-co:
           run-params: ""
-      - build-co:
+      - dbt-build-co:
           build-params: >
             --exclude tag:demo tag:pit 
+            << pipeline.parameters.dbt-metadata-vars >>
+      - log-pipeline-action-co:
+          run-params: >
+            --args '{component: pipeline, job_step: on-run-end}' 
             << pipeline.parameters.dbt-metadata-vars >>
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
@@ -302,7 +308,7 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: ""
-      - build-co:
+      - dbt-build-co:
           build-params: "--exclude tag:demo"
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
@@ -319,7 +325,7 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: "--target arc_test"
-      - build-co:
+      - dbt-build-co:
           build-params: "--target arc_test << pipeline.parameters.dbt-test-vars >> --exclude tag:demo"
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
