@@ -1,3 +1,32 @@
+Skip to content
+Search or jump to…
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+ 
+@hughesdatatech 
+hughesdatatech
+/
+dw-dbt
+Private
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
+Settings
+dw-dbt/.circleci/config.yml
+@hughesdatatech
+hughesdatatech test
+Latest commit f255735 1 hour ago
+ History
+ 1 contributor
+357 lines (340 sloc)  10.5 KB
+
 version: 2.1
 
 orbs:
@@ -105,17 +134,71 @@ commands: #-co
             }
           event: fail
 
-  log-pipeline-action-co:
+  extract-and-load-co:
     parameters:
       run-params:
-        description: Optional arguments to be passed to the dbt run-operation command
-        default: ""
+        description: Optional arguments to be passed to the meltano run command
+        default: "--exclude tag:demo tag:pit"
         type: string
     steps:
-       - run:
-          name: Log pipeline action
-          command: cd dw && dbt run-operation <<parameters.run-params>>
-      
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "starting meltano extract/load...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: always
+      - run:
+          name: Extract json data
+          command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "meltano extract/load succeeded!",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: pass
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "meltano extract/load failed!",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: fail
+
   build-co:
     parameters:
       build-params:
@@ -204,9 +287,6 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: ""
-      - log-pipeline-action-co:
-          run-params: >
-            --args '{component: pipeline, job_step: on-run-start}'
       - extract-and-load-co:
           run-params: ""
       - build-co:
@@ -216,9 +296,6 @@ jobs: #-jb
             pipeline_project_metadata: << pipeline.project.git_url >> | << pipeline.project.type >> | << pipeline.git.tag >> | << pipeline.git.branch >> | << pipeline.git.revision >> | << pipeline.git.base_revision >>,
             pipeline_schedule_metadata: << pipeline.in_setup >> | << pipeline.trigger_source >> | << pipeline.schedule.name >> | << pipeline.schedule.id >>
             }'
-      - log-pipeline-action-co:
-          run-params: >
-            --args '{component: pipeline, job_step: on-run-end}'
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
