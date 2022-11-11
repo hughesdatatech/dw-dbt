@@ -24,7 +24,7 @@ clean-targets: # Directories to be removed by `dbt clean`.
   - "target"
   - "dbt_packages"
 
-on-run-start: "{{ process_log_handler(component='job', job_step='on-run-start', build_env_metadata1=var('build_env_metadata1'), build_env_metadata2=var('build_env_metadata2')) }}"
+on-run-start: "{{ process_log_handler(component='job', job_step='on-run-start') }}"
 on-run-end: "{{ process_log_handler(component='job', job_step='on-run-end') }}"
 
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
@@ -156,9 +156,9 @@ vars:
   # dbt run --vars 'test_row_limit: 1' --select tag:staging
   test_row_limit: 0
 
-  build_env_metadata1: 'null'
-
-  build_env_metadata2: 'null'
+  pipeline_metadata: 'null'
+  pipeline_project_metadata: 'null'
+  pipeline_schedule_metadata: 'null'
 
   run_key: 0
 
