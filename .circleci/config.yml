@@ -148,6 +148,9 @@ commands: #-co
             }
           event: always
       - run:
+          name: Generate state for .env file
+          command: cd dw-meltano/dw-ownbackup && python.exe gen_state.py
+      - run:
           name: Extract/load json data
           command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
       - slack/notify:
@@ -383,8 +386,8 @@ workflows: #-wf
           filters:
             branches:
               only: 
-                - main
-                #- development
+                #- main
+                - development
 
   # Daily scheduled workflow for the entire pipeline, excluding monthly PIT tables (or manual trigger)
   scheduled-pipeline-daily-wf: 
