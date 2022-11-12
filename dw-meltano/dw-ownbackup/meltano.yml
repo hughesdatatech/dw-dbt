@@ -14,7 +14,8 @@ environments:
           "streams": [
             {
                 "name": "data-pa-opioid_stays",
-                "primary_keys": ["county_name"]
+                "primary_keys": ["county_name", "time_period_date_end"],
+                "replication-method": FULL_TABLE
             }
           ]
       loaders:

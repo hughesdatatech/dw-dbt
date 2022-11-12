@@ -239,10 +239,10 @@ vars:
 
   stg_pagov__model_config:
       pagov__opioid_stays: 
-        track_key_deletes: true 
-        unique_key: ['county_name', 'time_period']
+        track_key_deletes: false 
+        unique_key: ['county_name', 'time_period_date_end']
         boolean_cols:
-        reserved_cols: [':@COMPUTED_REGION_AMQZ_JBR4', ':@COMPUTED_REGION_D3GW_ZNNF', ':@COMPUTED_REGION_NMSQ_HQVV', ':@COMPUTED_REGION_R6RF_P9ET', ':@COMPUTED_REGION_RAYF_JJGK']
+        reserved_cols:
         boolean_reserved_cols:
 
   # Schema configuration used internally by the DW.

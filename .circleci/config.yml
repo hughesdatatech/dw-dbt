@@ -21,6 +21,9 @@ parameters: #-pp
       pipeline_key: << pipeline.id >> | << pipeline.number >>,
       pipeline_project_metadata: << pipeline.project.git_url >> | << pipeline.project.type >> | << pipeline.git.tag >> | << pipeline.git.branch >> | << pipeline.git.revision >> | << pipeline.git.base_revision >>,
       pipeline_schedule_metadata: << pipeline.in_setup >> | << pipeline.trigger_source >> | << pipeline.schedule.name >> | << pipeline.schedule.id >>
+  gen-state-args:
+    type: string
+    default:
 
 commands: #-co
   setup-and-compile-co:
@@ -149,7 +152,7 @@ commands: #-co
           event: always
       - run:
           name: Generate state for .env file
-          command: cd dw-meltano/dw-ownbackup && python gen_state.py
+          command: cd dw-meltano/dw-ownbackup && python gen_state.py << pipeline.parameters.gen-state-args >>
       - run:
           name: Extract/load json data
           command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake

@@ -15,7 +15,7 @@
             unique_key=snapshot_model_name + '_hk',
             strategy='timestamp',
             updated_at=snapshot_updated_at_col,
-            invalidate_hard_deletes=True,
+            invalidate_hard_deletes=False,
         )
     }}
 
@@ -29,7 +29,7 @@
             unique_key=snapshot_model_name + '_hk',
             strategy='check',
             check_cols=[snapshot_model_name + '_hd'],
-            invalidate_hard_deletes=True,
+            invalidate_hard_deletes=False,
         )
     }}
 

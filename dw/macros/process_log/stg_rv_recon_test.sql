@@ -40,7 +40,7 @@ as (
 FETCH_SAT_STATS1_{{ stg_table_name }}
 as (
   select
-    sum(cnt) as unique_key_stg_gross,
+    nvl(sum(cnt), 0) as unique_key_stg_gross,
     count(1) as unique_key_stg_unique
   from (
     select

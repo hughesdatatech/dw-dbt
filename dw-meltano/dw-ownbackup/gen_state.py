@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
-# pip install python-dotenv
 import os
 import shutil
 import sys
 import snowflake.connector
 from dotenv import load_dotenv
 from requests.utils import requote_uri
+
+# Check argv to see if we should force a full extract
+force_full_extract = len(sys.argv) > 1 and sys.argv[1] == 'force_full_extract'
 
 # Get vars for Snowflake connection
 load_dotenv()
@@ -24,19 +26,17 @@ cs = ctx.cursor()
 try:
     cs.execute("use warehouse dw_wh_xs")
     cs.execute("use database dw_dev")
-    #cs.execute("select count(1) from dw_dev.information_schema.tables where table_schema ilike 'dbt_steve' and table_name ilike 'rv_pagov__opioid_stays';")
-    cs.execute("select count(1) from information_schema.tables where table_schema ilike 'pagov' and table_name ilike 'opioid_stays';")
+    cs.execute("truncate table if exists pagov.opioid_stays")
+    cs.execute("select count(1) from information_schema.tables where table_schema ilike 'dbt_steve' and table_name ilike 'rv_pagov__opioid_stays'")
     rv_count = cs.fetchone()[0]
-    #print(rv_count)
     max_time_period_date_end = "'1900-01-01T00:00:00.000'"
 
-    if rv_count != 0:
-        sql = "select '''' || nvl(max(time_period_date_end), " + max_time_period_date_end + ") || '''' from pagov.opioid_stays"
-        #print(sql)
+    # Get the max time_period_date_end loaded to the raw vault if 1) we're not forcing a full extract, and 2) the raw vault table exists
+    if not force_full_extract and rv_count != 0:
+        sql = "select '''' || nvl(max(time_period_date_end), " + max_time_period_date_end + ") || '''' from dbt_steve.rv_pagov__opioid_stays"
         cs.execute(sql)
         max_time_period_date_end = cs.fetchone()[0]
     
-    #print(max_time_period_date_end)
     soql = requote_uri('?$where=time_period_date_end>' + max_time_period_date_end)
     #print(soql)
 finally:

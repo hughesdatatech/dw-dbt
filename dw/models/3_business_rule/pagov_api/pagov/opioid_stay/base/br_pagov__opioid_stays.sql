@@ -25,12 +25,6 @@ rv_base as (
                     )
         end as geography_point,
         
-        ":@COMPUTED_REGION_AMQZ_JBR4" as computed_region_amqz_jbr4,
-        ":@COMPUTED_REGION_D3GW_ZNNF" as computed_region_d3gw_znnf,
-        ":@COMPUTED_REGION_NMSQ_HQVV" as computed_region_nmsq_hqvv,
-        ":@COMPUTED_REGION_R6RF_P9ET" as computed_region_r6rf_p9et,
-        ":@COMPUTED_REGION_RAYF_JJGK" as computed_region_rayf_jjgk,
-
         -- metrics
         try_to_decimal(count_of_maternal_stays_with, 14, 0) as maternal_stays_count,
         type_of_count as count_description,
