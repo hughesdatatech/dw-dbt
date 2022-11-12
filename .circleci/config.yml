@@ -23,7 +23,7 @@ parameters: #-pp
       pipeline_schedule_metadata: << pipeline.in_setup >> | << pipeline.trigger_source >> | << pipeline.schedule.name >> | << pipeline.schedule.id >>
   gen-state-args:
     type: string
-    default:
+    default: ""
 
 commands: #-co
   setup-and-compile-co:
