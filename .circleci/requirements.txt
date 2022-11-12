@@ -1,2 +1,3 @@
 pipx
 dbt-snowflake==1.3.0
+python-dotenv
