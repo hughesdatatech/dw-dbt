@@ -10,28 +10,28 @@ environments:
         config:
           name: data-pa-opioid_stays
           api_url: https://data.pa.gov/resource/r2n4-n2i4.json
+          path: TAP_REST_API_MSDK_PATH
           "streams": [
             {
                 "name": "data-pa-opioid_stays",
-                "path": "/",
                 "primary_keys": ["county_name"]
             }
           ]
       loaders:
       - name: target-snowflake
         config:
-          account: dqb41319.us-east-1
+          account: TARGET_SNOWFLAKE_ACCOUNT
           dbname: dw_dev
-          user: shughes
-          password: Q!B0oimh0o
+          user: TARGET_SNOWFLAKE_USER
+          password: TARGET_SNOWFLAKE_PASSWORD
           warehouse: DW_WH_XS
           file_format: dw_dev.pagov.json_format
           role: accountadmin
           default_target_schema: pagov
           s3_bucket: arn:aws:s3:us-east-1:774809006633:accesspoint/stage-ap
           stage: pagov.hughedatatech_ext_s3_stage
-          aws_access_key_id: AKIA3IZRXGIUUB2ZS36Z
-          aws_secret_access_key: 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
+          aws_access_key_id: TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID
+          aws_secret_access_key: TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY
 - name: staging
 - name: prod
 plugins:
