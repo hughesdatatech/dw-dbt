@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: im_concept_name
-  - name: im_concept_name_hist
-  - name: im_concept_name_pit
-  - name: vim_concept_name
+  - name: im_opioid_stay
+  - name: im_opioid_stay_hist
+  - name: im_opioid_stay_pit
+  - name: vim_opioid_stay

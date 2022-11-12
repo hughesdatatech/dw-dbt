@@ -237,13 +237,6 @@ vars:
   #
   ########################################################################################################################
 
-  stg_demo_schema__model_config:
-      demo_schema__demo_table: 
-        track_key_deletes: true 
-        unique_key: ['id']
-        boolean_cols:
-        reserved_cols:
-        boolean_reserved_cols:
   stg_pagov__model_config:
       pagov__opioid_stays: 
         track_key_deletes: true 
@@ -254,11 +247,6 @@ vars:
 
   # Schema configuration used internally by the DW.
   stg_schema_config:
-      demo_schema:
-        snapshot_strategy: check
-        snapshot_updated_at_col: 
-        staging_model_default_exception_cols: 
-        staging_model_order_by_cols: ['1 desc']
       pagov:
         snapshot_strategy: check
         snapshot_updated_at_col: 
