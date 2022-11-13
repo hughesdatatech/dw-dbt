@@ -7,8 +7,13 @@ import snowflake.connector
 from dotenv import load_dotenv
 from requests.utils import requote_uri
 
-# Check argv to see if we should force a full extract
-force_full_extract = len(sys.argv) > 1 and sys.argv[1] == 'force_full_extract'
+# Check argv to see if we should force a full extract or use an override value
+max_date_end_override = ''
+force_full_extract = False
+
+if len(sys.argv) > 1:
+    max_date_end_override = sys.argv[1]
+    force_full_extract = max_date_end_override == 'force_full_extract'
 
 # Get vars for Snowflake connection
 load_dotenv()
@@ -32,13 +37,13 @@ try:
     max_time_period_date_end = "'1900-01-01T00:00:00.000'"
 
     # Get the max time_period_date_end loaded to the raw vault if 1) we're not forcing a full extract, and 2) the raw vault table exists
-    if not force_full_extract and rv_count != 0:
+    if not force_full_extract and max_date_end_override != '' and rv_count != 0:
         sql = "select '''' || nvl(max(time_period_date_end), " + max_time_period_date_end + ") || '''' from dbt_steve.rv_pagov__opioid_stays"
         cs.execute(sql)
         max_time_period_date_end = cs.fetchone()[0]
     
     soql = requote_uri('?$where=time_period_date_end>' + max_time_period_date_end)
-    #print(soql)
+    print('using soql == ' + soql)
 finally:
     cs.close()
 ctx.close()

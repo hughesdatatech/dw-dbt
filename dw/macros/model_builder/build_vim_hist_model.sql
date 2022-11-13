@@ -5,7 +5,7 @@
 {%- set effective_end_date_col = im_model_name + 'effective_ending_at' -%}
 
 {%- set concept_name = im_model_name.lstrip('im_') -%}
-{%- set unique_key = concept_name + 'id'
+{%- set unique_key = im_model_name + 'hk'
         if unique_key is none
         else unique_key -%}
 
