@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: stg_pagov__opioid_stays
+    columns:
+      - name: count_of_maternal_stays_with
+        tests:
+          - not_null
+      - name: rate_of_maternal_stays_with
+        tests:
+          - dbt_utils.expression_is_true:
+               expression: '< 50'
+      - name: county_code_number
+        tests:
+          - unique
