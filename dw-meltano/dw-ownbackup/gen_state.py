@@ -10,10 +10,13 @@ from requests.utils import requote_uri
 # Check argv to see if we should force a full extract or use an override value
 max_date_end_override = ''
 force_full_extract = False
+max_time_period_date_end = "'1900-01-01T00:00:00.000'"
 
 if len(sys.argv) > 1:
     max_date_end_override = sys.argv[1]
     force_full_extract = max_date_end_override == 'force_full_extract'
+    if not force_full_extract:
+        max_time_period_date_end = max_date_end_override
 
 # Get vars for Snowflake connection
 load_dotenv()
@@ -34,10 +37,9 @@ try:
     cs.execute("truncate table if exists pagov.opioid_stays")
     cs.execute("select count(1) from information_schema.tables where table_schema ilike 'dbt_steve' and table_name ilike 'rv_pagov__opioid_stays'")
     rv_count = cs.fetchone()[0]
-    max_time_period_date_end = "'1900-01-01T00:00:00.000'"
-
-    # Get the max time_period_date_end loaded to the raw vault if 1) we're not forcing a full extract, and 2) the raw vault table exists
-    if not force_full_extract and max_date_end_override != '' and rv_count != 0:
+    
+    # Get the max time_period_date_end loaded to the raw vault if 1) we're not forcing a full extract, 2) are not overriding the value, and 3) the raw vault table exists
+    if not force_full_extract and max_date_end_override == '' and rv_count != 0:
         sql = "select '''' || nvl(max(time_period_date_end), " + max_time_period_date_end + ") || '''' from dbt_steve.rv_pagov__opioid_stays"
         cs.execute(sql)
         max_time_period_date_end = cs.fetchone()[0]
