@@ -341,6 +341,55 @@ jobs: #-jb
           event: fail
           template: basic_fail_1
 
+  dbt-sf-runner-el-only-jb:
+    docker:
+      - image: cimg/python:3.9.7
+    steps:
+      - setup-and-compile-co:
+          compile-params: >
+            --vars '{
+            << pipeline.parameters.dbt-metadata-vars >>,
+            << pipeline.parameters.dbt-compile-vars >>
+            }'
+      - log-pipeline-action-co:
+          run-params: >
+            --args '{object_type: pipeline, event_name: log_pipeline_action, sequence_description: on_run_start}' 
+            --vars '{ 
+            << pipeline.parameters.dbt-metadata-vars >>,
+            object_identifier_override: << pipeline.id >> | << pipeline.number >>
+            }'
+      - log-pipeline-action-co:
+          run-params: >
+            --args '{object_type: meltano_project, event_name: log_pipeline_action, sequence_description: on_run_start}' 
+            --vars '{ 
+            << pipeline.parameters.dbt-metadata-vars >>,
+            object_identifier_override: dw-meltano
+            }'
+      - extract-and-load-co:
+          run-params: ""
+      - log-pipeline-action-co:
+          run-params: >
+            --args '{object_type: meltano_project, event_name: log_pipeline_action, sequence_description: on_run_end}' 
+            --vars '{ 
+            << pipeline.parameters.dbt-metadata-vars >>,
+            object_identifier_override: dw-meltano
+            }'
+      - log-pipeline-action-co:
+          run-params: >
+            --args '{object_type: pipeline, event_name: log_pipeline_action, sequence_description: on_run_end}' 
+            --vars '{ 
+            << pipeline.parameters.dbt-metadata-vars >>,
+            object_identifier_override: << pipeline.id >> | << pipeline.number >>
+            }'
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
+  
   dbt-sf-runner-monthly-pit-jb:
     docker:
       - image: cimg/python:3.9.7
@@ -400,6 +449,14 @@ workflows: #-wf
         - equal: [ "dbt-sf-runner-daily", << pipeline.schedule.name >> ]
     jobs:
       - dbt-sf-runner-daily-jb
+
+  # EL only via manual trigger
+  manual-pipeline-el-only-wf: 
+    when:
+      or:
+        - equal: [ "dbt-sf-runner-el-only-jb", << pipeline.parameters.manual-trigger-pp >> ]
+    jobs:
+      - dbt-sf-runner-el-only-jb
 
   # Monthly scheduled workflow for the entire pipeline, including PIT tables (or manual trigger)
   scheduled-pipeline-monthly-pit-wf:
