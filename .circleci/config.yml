@@ -36,7 +36,21 @@ commands: #-co
       - checkout
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
-          custom: {"blocks": [{"type": "section", "fields": [{"type": "plain_text", "text": "starting dbt/meltano installation, and project parse/compile...", "emoji": true}]}]}
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "starting dbt/meltano installation, and project parse/compile...",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
           event: always
       - run:
           name: Set up dbt profile and meltano .env vars
