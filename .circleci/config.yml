@@ -54,6 +54,9 @@ commands: #-co1
       - run:
           name: Run dbt compile
           command: cd dw && dbt compile <<parameters.compile-params>>
+      - run:
+          name: Run pre-commit
+          command: cd dw && pre-commit run --all-files
       
   setup-and-compile-co:
     parameters:
