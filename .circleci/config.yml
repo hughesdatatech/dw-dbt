@@ -468,8 +468,8 @@ workflows: #-wf
           filters:
             branches:
               only: 
-                #- main
-                - development
+                - main
+                #- development
 
   # Daily scheduled workflow for the entire pipeline, excluding monthly PIT tables (or manual trigger)
   scheduled-pipeline-daily-wf: 
