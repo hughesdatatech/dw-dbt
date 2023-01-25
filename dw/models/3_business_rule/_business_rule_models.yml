@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  ### accruals
+  - name: br_opioid_stay
+    columns:
+      - name: county_name
+        tests:
+          - unique
+  - name: br_pagov__opioid_stays
+    columns:
+      - name: county_name
+        tests:
+          - unique
