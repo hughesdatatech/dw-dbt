@@ -25,7 +25,36 @@ parameters: #-pp
     type: string
     default: ""
 
-commands: #-co
+commands: #-co1
+  setup-and-compile-co1:
+    parameters:
+      compile-params:
+        description: Optional arguments to be passed to the dbt compile command
+        default: ""
+        type: string
+    steps:
+      - checkout
+      - run:
+          name: Set up dbt profile
+          command: |
+            mkdir -p ~/.dbt
+            mv .circleci/profiles.yml ~/.dbt/profiles.yml 
+            cat  ~/.dbt/profiles.yml
+            mv .circleci/requirements.txt  ~/.dbt/requirements.txt
+      - python/install-packages:
+          pkg-manager: pip
+          app-dir: ~/.dbt/  # if your requirements.txt isn't in the root directory.
+          # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements. 
+      - run:
+          name: Run dbt deps
+          command: cd dw && dbt deps
+      - run:
+          name: Run dbt parse
+          command: cd dw && dbt parse
+      - run:
+          name: Run dbt compile
+          command: cd dw && dbt compile <<parameters.compile-params>>
+      
   setup-and-compile-co:
     parameters:
       compile-params:
@@ -275,7 +304,8 @@ jobs: #-jb
     docker:
       - image: cimg/python:3.9.7
     steps:
-      - setup-and-compile-co:
+      #- setup-and-compile-co:
+      - setup-and-compile-co1:
           compile-params: ""
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
