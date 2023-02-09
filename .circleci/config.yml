@@ -71,8 +71,11 @@ commands: #-co1
           name: Add
           command: cd dw && git add docs/
       - run:
-          name: Commit docs
+          name: Commit
           command: cd dw && git commit -m "[skip ci]"
+      - run:
+          name: Push
+          command: cd dw && git push
       
   setup-and-compile-co:
     parameters:
