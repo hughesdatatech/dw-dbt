@@ -61,6 +61,9 @@ commands: #-co1
       - run:
           name: Run dbt docs
           command: cd dw && dbt docs generate --target-path ./docs --no-compile
+      - run:
+          name: Commit docs
+          command: cd dw && git commit -m "[skip ci]"
       
   setup-and-compile-co:
     parameters:
