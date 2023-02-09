@@ -6,11 +6,11 @@ select
     
         'dw_dev.dbt_steve.br_opioid_stay' as im_opioid_stay_rec_source,
     
-    'a85053ac-b23e-421a-9a1d-d2aa3ed2f0f3' as im_opioid_stay_job_id,
+    '49601a07-6371-45d5-b88b-e928ea5e3e27' as im_opioid_stay_job_id,
     'circleci' as im_opioid_stay_job_user_id,
     jira_task_key as im_opioid_stay_jira_task_key,
-    to_char(timestamp '2023-02-09 20:15:52.142086+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp  as im_opioid_stay_extracted_at,
-    to_char(timestamp '2023-02-09 20:15:52.142086+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp im_opioid_stay_loaded_at,
+    to_char(timestamp '2023-02-09 20:23:46.434391+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp  as im_opioid_stay_extracted_at,
+    to_char(timestamp '2023-02-09 20:23:46.434391+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp im_opioid_stay_loaded_at,
     'im_opioid_stay_tenant_key = ' || nvl(im_opioid_stay_tenant_key, '') || '; ' ||
     'im_opioid_stay_hk = ' || nvl(im_opioid_stay_hk::varchar, '') || '; ' ||
     'im_opioid_stay_job_id = ' || nvl(im_opioid_stay_job_id, '') || '; ' ||
