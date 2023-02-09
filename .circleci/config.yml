@@ -68,6 +68,9 @@ commands: #-co1
           name: Name
           command: cd dw && git config --global user.name "hughesdatatech"
       - run:
+          name: Add
+          command: cd dw && git add docs/
+      - run:
           name: Commit docs
           command: cd dw && git commit -m "[skip ci]"
       
