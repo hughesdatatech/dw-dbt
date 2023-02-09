@@ -62,8 +62,14 @@ commands: #-co1
           name: Run dbt docs
           command: cd dw && dbt docs generate --target-path ./docs --no-compile
       - run:
+          name: Email
+          command: cd dw && git config --global user.email "hughesdatatech@gmail.com"
+      - run:
+          name: Name
+          command: cd dw && git config --global user.name "hughesdatatech"
+      - run:
           name: Commit docs
-          command: cd dw && git commit -m "[skip ci]" --author="hughesdatatech <hughesdatatech@gmail.com>"
+          command: cd dw && git commit -m "[skip ci]"
       
   setup-and-compile-co:
     parameters:
