@@ -63,7 +63,7 @@ commands: #-co1
           command: cd dw && dbt docs generate --target-path ./docs --no-compile
       - run:
           name: Commit docs
-          command: cd dw && git commit -m "[skip ci]" --author="hughesdatatech@gmail.com"
+          command: cd dw && git commit -m "[skip ci]" --author="hughesdatatech <hughesdatatech@gmail.com>"
       
   setup-and-compile-co:
     parameters:
