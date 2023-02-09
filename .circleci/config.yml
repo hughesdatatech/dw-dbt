@@ -463,12 +463,15 @@ jobs: #-jb
       - image: cimg/python:3.9.7
     steps:
       - checkout
-      - gh/setup
       - run:
-          command: |
-            gh pr create --title "Bugfix from $CIRCLE_BRANCH"
-          name: Create Pull Request
-      - gh/clone
+          name: git test
+          command: cd dw && git --help
+      #- gh/setup
+      #- run:
+          #command: |
+            #gh pr create --title "Bugfix from $CIRCLE_BRANCH"
+          #name: Create Pull Request
+      #- gh/clone
              
 workflows: #-wf
   version: 2
