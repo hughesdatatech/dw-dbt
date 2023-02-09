@@ -58,6 +58,9 @@ commands: #-co1
       - run:
           name: Run pre-commit
           command: cd dw && pre-commit run --all-files
+      - run:
+          name: Run dbt docs
+          command: cd dw && dbt docs generate --target-path ./docs --no-compile
       
   setup-and-compile-co:
     parameters:
@@ -479,8 +482,8 @@ workflows: #-wf
   use-my-orb:
     when:
       or:
-        #- equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
-        - equal: [ "webhook", << pipeline.trigger_source >> ]
+        - equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
+        #- equal: [ "webhook", << pipeline.trigger_source >> ]
     jobs:
       - create-a-pr
 
@@ -489,14 +492,14 @@ workflows: #-wf
     when:
       or:
         - equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
-        #- equal: [ "webhook", << pipeline.trigger_source >> ]
+        - equal: [ "webhook", << pipeline.trigger_source >> ]
     jobs:
       - setup-and-compile-jb:
           filters:
             branches:
               only: 
-                - main
-                #- development
+                #- main
+                - development
 
   # Daily scheduled workflow for the entire pipeline, excluding monthly PIT tables (or manual trigger)
   scheduled-pipeline-daily-wf: 
