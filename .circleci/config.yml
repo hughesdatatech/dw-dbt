@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   python: circleci/python@2.1.1
   slack: circleci/slack@4.10.1
+  github-cli: circleci/github-cli@2.2.0
 
 parameters: #-pp
   manual-trigger-pp:
@@ -456,16 +457,35 @@ jobs: #-jb
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
+
+  create-a-pr:
+    docker:
+      - image: cimg/python:3.9.7
+    steps:
+      - gh/setup
+      - run:
+          command: |
+            gh pr create --title "Bugfix from $CIRCLE_BRANCH"
+          name: Create Pull Request
+      - gh/clone
              
 workflows: #-wf
   version: 2
+
+  use-my-orb:
+    when:
+      or:
+        #- equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
+        - equal: [ "webhook", << pipeline.trigger_source >> ]
+    jobs:
+      - create-a-pr
 
   # Setup and compile workflow, triggered upon push to main or development (or manual trigger)
   setup-and-compile-wf:
     when:
       or:
         - equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
-        - equal: [ "webhook", << pipeline.trigger_source >> ]
+        #- equal: [ "webhook", << pipeline.trigger_source >> ]
     jobs:
       - setup-and-compile-jb:
           filters:
