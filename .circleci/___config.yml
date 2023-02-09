@@ -62,14 +62,20 @@ commands: #-co1
           name: Run dbt docs
           command: cd dw && dbt docs generate --target-path ../docs
       - run:
-          name: Push docs
-          command: |
-            cd dw
-            git config --global user.email "hughesdatatech@gmail.com"
-            git config --global user.name "hughesdatatech"
-            git add ../docs/
-            git commit -m "[skip ci]"
-            git push --repo="$CIRCLE_REPOSITORY_URL" --set-upstream origin development
+          name: Email
+          command: cd dw && git config --global user.email "hughesdatatech@gmail.com"
+      - run:
+          name: Name
+          command: cd dw && git config --global user.name "hughesdatatech"
+      - run:
+          name: Add
+          command: cd dw && git add ../docs/
+      - run:
+          name: Commit
+          command: cd dw && git commit -m "[skip ci]"
+      - run:
+          name: Push
+          command: cd dw && git push --repo="$CIRCLE_REPOSITORY_URL" --set-upstream origin development
       
   setup-and-compile-co:
     parameters:
