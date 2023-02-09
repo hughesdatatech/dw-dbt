@@ -3,7 +3,7 @@ version: 2.1
 orbs:
   python: circleci/python@2.1.1
   slack: circleci/slack@4.10.1
-  github-cli: circleci/github-cli@2.2.0
+  gh: circleci/github-cli@2.2.0
 
 parameters: #-pp
   manual-trigger-pp:
