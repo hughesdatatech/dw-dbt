@@ -60,7 +60,7 @@ commands: #-co1
           command: cd dw && pre-commit run --all-files
       - run:
           name: Run dbt docs
-          command: cd dw && dbt docs generate --target-path ../docs --no-compile
+          command: cd dw && dbt docs generate --target-path ../docs
       - run:
           name: Email
           command: cd dw && git config --global user.email "hughesdatatech@gmail.com"
