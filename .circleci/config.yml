@@ -462,6 +462,7 @@ jobs: #-jb
     docker:
       - image: cimg/python:3.9.7
     steps:
+      - checkout
       - gh/setup
       - run:
           command: |
