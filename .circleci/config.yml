@@ -75,7 +75,7 @@ commands: #-co1
           command: cd dw && git commit -m "[skip ci]"
       - run:
           name: Push
-          command: cd dw && git push
+          command: cd dw && --set-upstream origin development
       
   setup-and-compile-co:
     parameters:
