@@ -52,14 +52,14 @@ commands: #-co1
       - run:
           name: Run dbt deps
           command: cd dw && dbt deps
-      - run:
-          name: Run dbt parse
+      #- run:
+          #name: Run dbt parse
           #command: cd dw && dbt parse
-      - run:
-          name: Run dbt compile
+      #- run:
+          #name: Run dbt compile
           #command: cd dw && dbt compile <<parameters.compile-params>>
-      - run:
-          name: Run pre-commit
+      #- run:
+          #name: Run pre-commit
           #command: cd dw && pre-commit run --all-files
       - run:
           name: Run dbt docs
