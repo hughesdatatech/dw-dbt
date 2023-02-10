@@ -3,13 +3,13 @@ dw:
   outputs:
     dev:
       type: snowflake
-      account: dqb41319.us-east-1
+      account: CCI_TARGET_SNOWFLAKE_ACCOUNT
 
       # User/password auth
-      user: shughes
-      password: Q!B0oimh0o
+      user: shughes_test
+      password: CCI_TARGET_SNOWFLAKE_PASSWORD
 
-      role: accountadmin
+      role: public
       database: dw_dev
       warehouse: dw_wh_xs
       schema: dbt_steve
