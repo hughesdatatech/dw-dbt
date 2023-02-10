@@ -65,11 +65,11 @@ commands: #-co1
           name: Push docs
           command: |
             cd dw
-            #git config --global user.email "test@gmail.com"
-            #git config --global user.name "test"
-            #git add ../docs/
-            #git commit -m "[skip ci]"
-            #git push --repo="$CIRCLE_REPOSITORY_URL" --set-upstream origin development
+            git config --global user.email "hughesdatatech@gmail.com"
+            git config --global user.name "hughesdatatech"
+            git add ../docs/
+            git commit -m "[skip ci]"
+            git push --repo="$CIRCLE_REPOSITORY_URL" --set-upstream origin development
       
   setup-and-compile-co:
     parameters:
