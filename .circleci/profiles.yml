@@ -6,7 +6,7 @@ dw:
       account: CCI_TARGET_SNOWFLAKE_ACCOUNT
 
       # User/password auth
-      user: shughes_test
+      user: CCI_TARGET_SNOWFLAKE_USER
       password: CCI_TARGET_SNOWFLAKE_PASSWORD
 
       role: public
