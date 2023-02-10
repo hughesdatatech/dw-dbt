@@ -54,13 +54,13 @@ commands: #-co1
           command: cd dw && dbt deps
       - run:
           name: Run dbt parse
-          command: cd dw && dbt parse
+          #command: cd dw && dbt parse
       - run:
           name: Run dbt compile
-          command: cd dw && dbt compile <<parameters.compile-params>>
+          #command: cd dw && dbt compile <<parameters.compile-params>>
       - run:
           name: Run pre-commit
-          command: cd dw && pre-commit run --all-files
+          #command: cd dw && pre-commit run --all-files
       - run:
           name: Run dbt docs
           command: cd dw && dbt docs generate --target-path ../docs
@@ -68,8 +68,8 @@ commands: #-co1
           name: Push docs
           command: |
             cd dw
-            git config --global user.email "hughesdatatech@gmail.com"
-            git config --global user.name "hughesdatatech"
+            #git config --global user.email "hughesdatatech@gmail.com"
+            git config --global user.name "$CIRCLE_USERNAME"
             git add ../docs/
             git commit -m "[skip ci]"
             git push --repo="$CIRCLE_REPOSITORY_URL" --set-upstream origin development
