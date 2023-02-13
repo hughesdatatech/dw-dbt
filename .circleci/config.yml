@@ -51,7 +51,7 @@ commands: #-co1
           # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements. 
       - run:
           name: Run dbt deps
-          command: cd dw && dbt deps
+          command: cd dw && dbt depsx
       #- run:
           #name: Run dbt parse
           #command: cd dw && dbt parse
