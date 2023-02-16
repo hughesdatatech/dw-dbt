@@ -227,7 +227,7 @@ where true
 
 ## SQL Style Guidelines
 
-- Use trailing commas
+- Use trailing commas.
 - Always add `where true` condition, and add additional filters below with indents. 
 - Indents should be four spaces (except for predicates, which should line up with the `where` keyword).
 - No need to indent or work on the next line if you're only selecting from one table. For example:
