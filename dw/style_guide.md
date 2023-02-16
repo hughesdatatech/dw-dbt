@@ -129,8 +129,7 @@ Our models are organized into file and folder structures as follows (using the S
 
 * Information marts that provide current-value (i.e. "present-tense") data should be in the format `im_<concept_name>`. For example, `im_claim` is a claim information mart containing only current-value data for all claim attributes.
 * Current-value information marts are the most basic and should be implemented first.
-* Dependencies: Current-value information marts are typically dependent on one or more business rule models, and may depend on other information marts. 
-    * We might base an information mart on another information mart according to how much data processing we need to create an output. If multiple information marts rely on a resource-intensive calculation, for example, then it's probably best to do the calculation _once_ in one information mart. From there, any other information marts that need the same calculation can be built leveraging the calculation that was done in the first information mart.
+* Dependencies: Current-value information marts are typically dependent on one or more business rule models, and may depend on other information marts. For example, we might base an information mart on another information mart according to how much data processing we need to create an output. If multiple information marts rely on a resource-intensive calculation, then it's probably best to do the calculation _once_ in one information mart. From there, any other information marts that need the same calculation can be built leveraging the calculation that was done in the first information mart.
 * Model materialization: table (full reload)
 * Primary folder: 4_info_mart\concept_name\current
 
