@@ -1,4 +1,4 @@
-# ds-dbt Model, Project Structure, and Style Guide
+# dbt Model, Project Structure, and Style Guide
 
 [For reference, dbt's official style guide](https://github.com/dbt-labs/corp/blob/main/dbt_style_guide.md)
 
