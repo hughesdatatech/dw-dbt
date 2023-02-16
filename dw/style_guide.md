@@ -111,7 +111,7 @@ Our models are organized into file and folder structures as follows (using the S
 #### Type 1: "Base" Business Rules
 
 * Type-1 `base` business rules prepare raw vault tables for later use. Base models rename fields to business-friendly terms, do general data cleanup, coalesce nulls, perform basic field calculations, or other prep work. 
-* Base business rules are named in the format `br_<source_schema_name>_<source_table_name>`, e.g. `br_stripe_mobile_balance_transactions`. (Note only one underscore between schema name and table name.) Base business rules also live in their own subfolder within the business rules folder.
+* Base business rules are named in the format `br_<source_schema_name>_<source_table_name>`, e.g. `br_stripe_mobile_balance_transactions`. (_NB: only one underscore between schema name and table name.) Base business rules also live in their own subfolder within the business rules folder.
 * Dependencies: In most cases, `base` business rule models will be built from one raw vault model.
 
 #### Type 2: "Concept" Business Rules
