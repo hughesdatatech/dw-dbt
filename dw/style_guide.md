@@ -116,7 +116,7 @@ Our models are organized into file and folder structures as follows (using the S
 
 #### Type 2: "Concept" Business Rules
 
-* Type-2 'concept' business rules represent business _concepts_. They go a step further from base br models, and begin to shape, transform, and alter data, _or_ join together multiple models to implement more complex rules. 
+* Type-2 `concept` business rules represent business _concepts_. They go a step further from base br models, and begin to shape, transform, and alter data, _or_ join together multiple models to implement more complex rules. 
 * Business concept models are named according to the primary business concept they represent, in the format `br_<business_concept_name>`, e.g. `br_claim`. (_NB: the business concept name is singular, not plural._)
 * Dependencies: Business concept models can built from one or more other business rule models, or raw vault models.
 
