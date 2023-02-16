@@ -69,6 +69,7 @@ commands: #-co1
           name: Push docs
           command: |
             cd dw
+            # need email and name to confirm identity
             #git config --global user.email "hughesdatatech@gmail.com"
             git config --global user.name "$CIRCLE_USERNAME"
             git add ../docs/
