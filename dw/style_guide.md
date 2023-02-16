@@ -102,6 +102,7 @@ Our models are organized into file and folder structures as follows (using the S
 ### 3. Business Rule Models
 
 * Business rule models are named and organized into folders and sub-folders corresponding to either the table and schema from which they are being loaded, or the business concept they represent.
+* Dependencies: Business rule models should be built from one or more Raw Vault models, or other business rule models
 * Model materialization: view
 * Primary folder: 3_business_rule\data_source_name\schema_name\concept_name
 
