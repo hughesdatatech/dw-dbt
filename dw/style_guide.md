@@ -96,7 +96,7 @@ Our models are organized into file and folder structures as follows (using the S
 * Raw vault snapshots are considered separate models, but they are configured simply in files named for data source schemas.
 * Each schema has one file containing all the configured snapshots for its tables — one for `stripe_mobile`, one for `talktala_production`, etc.
 * Dependencies: Raw Vault snapshots should be built from exactly one staging model.
-* Model materialization: not configurable, but snapshots behave like incremental tables.
+* Model materialization: not configurable (but snapshots behave like incremental tables)
 * Primary folder: snapshots\2_raw_vault\schema_name
 
 ### 3. Business Rule Models
