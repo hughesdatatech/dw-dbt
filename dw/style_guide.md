@@ -301,7 +301,7 @@ Here's an abbreviated example from the `session_report` information mart:
 - In the select, state fields before aggregates / window functions.
 - Execute aggregations as early as possible, before joining to another table.
 - Ordering and grouping by a number (eg. group by 1, 2) is preferred over listing the column names (see [this rant](https://blog.getdbt.com/write-better-sql-a-defense-of-group-by-1/) for why).
-- Prefer `union all` to `union` [*](http://docs.aws.amazon.com/redshift/latest/dg/c_example_unionall_query.html)
+- Prefer `union all` to `union` [*](http://docs.aws.amazon.com/redshift/latest/dg/c_example_unionall_query.html).
 - Do not use single-letter aliases for tables. If a table has a single-word name (e.g. `plan` or `charges`), keep the table name or use a shortened version (e.g. `chg` for `charges`).
 - Be careful about abbreviating two-word tables with common abbreviations; `pt` could be `payment_transactions`, `payment_type`, `private_talks`, etc. In these scenarios, refer to the Confluence table documentation for suggested abbreviations (e.g. we customarily shorten `payment_transactions` to `tx`).
 - If joining two or more tables, _always_ prefix your column names with the table alias. If only selecting from one table, you don't need prefixes, but they're encouraged.
