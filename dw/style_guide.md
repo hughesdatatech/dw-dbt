@@ -95,7 +95,7 @@ Our models are organized into file and folder structures as follows (using the S
 * _NB: two underscores separate schema name from table name._
 * Raw vault snapshots are considered separate models, but they are configured simply in files named for data source schemas.
 * Each schema has one file containing all the configured snapshots for its tables — one for `stripe_mobile`, one for `talktala_production`, etc.
-* Dependencies: Raw Vault snapshots should be built from exactly one staging model.
+* Dependencies: Raw vault snapshots should be built from exactly one staging model.
 * Model materialization: not configurable (but snapshots behave like incremental tables)
 * Primary folder: snapshots\2_raw_vault\schema_name
 
@@ -110,15 +110,15 @@ Our models are organized into file and folder structures as follows (using the S
 
 #### Type 1: "Base" Business Rules
 
-* Type-1 `base` business rule models prepare staging tables for later use. Base models rename fields to business-friendly terms, do general data cleanup, coalesce nulls, perform basic field calculations, or other prep work. 
+* Type-1 `base` business rules prepare raw vault tables for later use. Base models rename fields to business-friendly terms, do general data cleanup, coalesce nulls, perform basic field calculations, or other prep work. 
 * Base business rules are named in the format `br_<source_schema_name>_<source_table_name>`, e.g. `br_stripe_mobile_balance_transactions`. (Note only one underscore between schema name and table name.) Base business rules also live in their own subfolder within the business rules folder.
-* Dependencies: In most cases, `base` business rule models will be built from one staging model.
+* Dependencies: In most cases, `base` business rule models will be built from one raw vault model.
 
 #### Type 2: "Concept" Business Rules
 
-* Type-2 business rule models represent business _concepts_. They go a step further from base br models, and begin to shape, transform, and alter data, _or_ join together multiple models to implement more complex rules. 
+* Type-2 'concept' business rules represent business _concepts_. They go a step further from base br models, and begin to shape, transform, and alter data, _or_ join together multiple models to implement more complex rules. 
 * Business concept models are named according to the primary business concept they represent, in the format `br_<business_concept_name>`, e.g. `br_claim`. (_NB: the business concept name is singular, not plural._)
-* Dependencies: Business concept models can built from one or more other business rule models, or staging models.
+* Dependencies: Business concept models can built from one or more other business rule models, or raw vault models.
 
 ### 4. Information Mart Models
 
