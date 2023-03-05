@@ -26,8 +26,8 @@ parameters: #-pp
     type: string
     default: ""
 
-commands: #-co1
-  setup-and-compile-co1:
+commands:
+  setup-and-compile-dbt-co:
     parameters:
       compile-params:
         description: Optional arguments to be passed to the dbt compile command
@@ -44,6 +44,9 @@ commands: #-co1
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_ACCOUNT/${CCI_TARGET_SNOWFLAKE_ACCOUNT}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_PASSWORD/${CCI_TARGET_SNOWFLAKE_PASSWORD}/g" ~/.dbt/profiles.yml
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" ~/.dbt/profiles.yml
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" ~/.dbt/profiles.yml
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" ~/.dbt/profiles.yml
             mv .circleci/requirements.txt  ~/.dbt/requirements.txt
       - python/install-packages:
           pkg-manager: pip
@@ -52,16 +55,12 @@ commands: #-co1
       - run:
           name: Run dbt deps
           command: cd dw && dbt deps
-      # test
-      #- run:
-          #name: Run dbt parse
-          #command: cd dw && dbt parse
-      #- run:
-          #name: Run dbt compile
-          #command: cd dw && dbt compile <<parameters.compile-params>>
-      #- run:
-          #name: Run pre-commit
-          #command: cd dw && pre-commit run --all-files
+      - run:
+          name: Run dbt compile
+          command: cd dw && dbt compile <<parameters.compile-params>>
+      - run:
+          name: Run pre-commit
+          command: cd dw && pre-commit run --all-files
       - run:
           name: Run dbt docs
           command: cd dw && dbt docs generate --target-path ../docs
@@ -70,7 +69,7 @@ commands: #-co1
           command: |
             cd dw
             # need email and name to confirm identity
-            #git config --global user.email "hughesdatatech@gmail.com"
+            git config --global user.email "hughesdatatech@gmail.com"
             git config --global user.name "$CIRCLE_USERNAME"
             git add ../docs/
             git commit -m "[skip ci]"
@@ -112,6 +111,13 @@ commands: #-co1
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" .circleci/.env
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_PASSWORD/${CCI_TARGET_SNOWFLAKE_PASSWORD}/g" .circleci/.env
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_ACCOUNT/${CCI_TARGET_SNOWFLAKE_ACCOUNT}/g" .circleci/.env
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" .circleci/.env
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" .circleci/.env
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA/${CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA}/g" .circleci/.env
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" .circleci/.env
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_FILE_FORMAT/${CCI_TARGET_SNOWFLAKE_FILE_FORMAT}/g" .circleci/.env
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_S3_BUCKET/${CCI_TARGET_SNOWFLAKE_S3_BUCKET}/g" .circleci/.env
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_STAGE/${CCI_TARGET_SNOWFLAKE_STAGE}/g" .circleci/.env
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID/${CCI_TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID}/g" .circleci/.env
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY/${CCI_TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY}/g" .circleci/.env
             mv .circleci/.env dw-meltano/dw-ownbackup/.env
@@ -321,12 +327,12 @@ commands: #-co1
 
 jobs: #-jb
 
-  setup-and-compile-jb:
+  setup-and-compile-dbt-jb:
     docker:
       - image: cimg/python:3.9.7
     steps:
       #- setup-and-compile-co:
-      - setup-and-compile-co1:
+      - setup-and-compile-dbt-co:
           compile-params: ""
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
@@ -508,7 +514,7 @@ workflows: #-wf
         - equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
         - equal: [ "webhook", << pipeline.trigger_source >> ]
     jobs:
-      - setup-and-compile-jb:
+      - setup-and-compile-dbt-jb:
           filters:
             branches:
               only: 

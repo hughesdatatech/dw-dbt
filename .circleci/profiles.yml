@@ -4,15 +4,12 @@ dw:
     dev:
       type: snowflake
       account: CCI_TARGET_SNOWFLAKE_ACCOUNT
-
-      # User/password auth
       user: CCI_TARGET_SNOWFLAKE_USER
       password: CCI_TARGET_SNOWFLAKE_PASSWORD
-
-      role: public
-      database: dw_dev
-      warehouse: dw_wh_xs
-      schema: dbt_steve
+      role: CCI_TARGET_SNOWFLAKE_ROLE
+      database: CCI_TARGET_SNOWFLAKE_DBNAME
+      warehouse: CCI_TARGET_SNOWFLAKE_WAREHOUSE
+      schema: CCI_TARGET_SNOWFLAKE_DBT_SCHEMA
       threads: 4
       client_session_keep_alive: False
       query_tag:

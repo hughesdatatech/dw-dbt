@@ -22,25 +22,29 @@ if len(sys.argv) > 1:
 load_dotenv()
 sf_user = os.environ.get('TARGET_SNOWFLAKE_USER') 
 sf_pw = os.environ.get('TARGET_SNOWFLAKE_PASSWORD') 
-sf_account = os.environ.get('TARGET_SNOWFLAKE_ACCOUNT')    
+sf_account = os.environ.get('TARGET_SNOWFLAKE_ACCOUNT')
+sf_db = os.environ.get('TARGET_SNOWFLAKE_DBNAME')
+sf_wh = os.environ.get('TARGET_SNOWFLAKE_WAREHOUSE')
+sf_tgt_schema = os.environ.get('TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA')
+sf_dbt_schema = os.environ.get('TARGET_SNOWFLAKE_DBT_SCHEMA')
 
 # Build URI for incremental load
 ctx = snowflake.connector.connect(
     user=sf_user,
     password=sf_pw,
-    account=sf_account
-    )
+    account=sf_account,
+    database=sf_db,
+    warehouse=sf_wh    
+)
 cs = ctx.cursor()
 try:
-    cs.execute("use warehouse dw_wh_xs")
-    cs.execute("use database dw_dev")
-    cs.execute("truncate table if exists pagov.opioid_stays")
-    cs.execute("select count(1) from information_schema.tables where table_schema ilike 'dbt_steve' and table_name ilike 'rv_pagov__opioid_stays'")
+    cs.execute("truncate table if exists " + sf_tgt_schema + ".opioid_stays")
+    cs.execute("select count(1) from information_schema.tables where table_schema ilike '" + sf_dbt_schema + "' and table_name ilike 'rv_pagov__opioid_stays'")
     rv_count = cs.fetchone()[0]
     
     # Get the max time_period_date_end loaded to the raw vault if 1) we're not forcing a full extract, 2) are not overriding the value, and 3) the raw vault table exists
     if not force_full_extract and max_date_end_override == '' and rv_count != 0:
-        sql = "select '''' || nvl(max(time_period_date_end), " + max_time_period_date_end + ") || '''' from dbt_steve.rv_pagov__opioid_stays"
+        sql = "select '''' || nvl(max(time_period_date_end), " + max_time_period_date_end + ") || '''' from " + sf_dbt_schema + ".rv_pagov__opioid_stays"
         cs.execute(sql)
         max_time_period_date_end = cs.fetchone()[0]
     
@@ -55,13 +59,28 @@ ctx.close()
 env_sf_user = 'TARGET_SNOWFLAKE_USER=' + sf_user + '\n'
 env_sf_pw = 'TARGET_SNOWFLAKE_PASSWORD=' + sf_pw + '\n'
 env_sf_account = 'TARGET_SNOWFLAKE_ACCOUNT=' + sf_account + '\n'
+env_sf_db = 'TARGET_SNOWFLAKE_DBNAME=' + sf_db + '\n'
+env_sf_wh = 'TARGET_SNOWFLAKE_WAREHOUSE=' + sf_wh + '\n'
+env_sf_sf_tgt_schema = 'TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA=' + sf_tgt_schema + '\n'
+env_sf_dbt_schema = 'TARGET_SNOWFLAKE_DBT_SCHEMA=' + sf_dbt_schema + '\n'
+env_sf_ff = 'TARGET_SNOWFLAKE_FILE_FORMAT=' + os.environ.get('TARGET_SNOWFLAKE_FILE_FORMAT') + '\n'
+env_sf_bucket = 'TARGET_SNOWFLAKE_S3_BUCKET=' + os.environ.get('TARGET_SNOWFLAKE_S3_BUCKET') + '\n'
+env_sf_stage = 'TARGET_SNOWFLAKE_STAGE=' + os.environ.get('TARGET_SNOWFLAKE_STAGE') + '\n'
 env_aws_key_id = 'TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID=' + os.environ.get('TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID') + '\n'
 env_aws_access_key = 'TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY=' + os.environ.get('TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY') + '\n'
 env_rest_path = 'TAP_REST_API_MSDK_PATH=' + soql + '\n'
-f= open("._env","w+")
+
+f = open("._env","w+")
 f.write(env_sf_user)
 f.write(env_sf_pw)
 f.write(env_sf_account)
+f.write(env_sf_db)
+f.write(env_sf_wh)
+f.write(env_sf_sf_tgt_schema)
+f.write(env_sf_dbt_schema)
+f.write(env_sf_ff)
+f.write(env_sf_bucket)
+f.write(env_sf_stage)
 f.write(env_aws_key_id)
 f.write(env_aws_access_key)
 f.write(env_rest_path)
