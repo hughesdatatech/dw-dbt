@@ -408,7 +408,8 @@ workflows: #-wf
         - equal: [ "dev-push-dbt", << pipeline.parameters.manual-trigger-pp >> ]
         - equal: [ "webhook", << pipeline.trigger_source >> ]
     jobs:
-      - dev-push-dbt-jb:
+      #- dev-push-dbt-jb:
+      - setup-and-compile-dbt-jb:
           filters:
             branches:
               only: 
