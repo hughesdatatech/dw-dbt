@@ -73,7 +73,6 @@ commands:
           command: |
             mkdir -p ~/.dbt
             mv .circleci/profiles.yml ~/.dbt/profiles.yml 
-            cat  ~/.dbt/profiles.yml
             # For dbt profile
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_ACCOUNT/${CCI_TARGET_SNOWFLAKE_ACCOUNT}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" ~/.dbt/profiles.yml
@@ -82,19 +81,20 @@ commands:
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" ~/.dbt/profiles.yml
+            cat  ~/.dbt/profiles.yml
             # For Meltano env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_PASSWORD/${CCI_TARGET_SNOWFLAKE_PASSWORD}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_ACCOUNT/${CCI_TARGET_SNOWFLAKE_ACCOUNT}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA/${CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_FILE_FORMAT/${CCI_TARGET_SNOWFLAKE_FILE_FORMAT}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_S3_BUCKET/${CCI_TARGET_SNOWFLAKE_S3_BUCKET}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_STAGE/${CCI_TARGET_SNOWFLAKE_STAGE}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID/${CCI_TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY/${CCI_TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_PASSWORD/${CCI_TARGET_SNOWFLAKE_PASSWORD}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_ACCOUNT/${CCI_TARGET_SNOWFLAKE_ACCOUNT}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA/${CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_FILE_FORMAT/${CCI_TARGET_SNOWFLAKE_FILE_FORMAT}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_S3_BUCKET/${CCI_TARGET_SNOWFLAKE_S3_BUCKET}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_STAGE/${CCI_TARGET_SNOWFLAKE_STAGE}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID/${CCI_TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID}/g" .circleci/.env
+            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY/${CCI_TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY}/g" .circleci/.env
             mv .circleci/.env dw-meltano/dw-ownbackup/.env
             cat dw-meltano/dw-ownbackup/.env
             mv .circleci/requirements.txt  ~/.dbt/requirements.txt
