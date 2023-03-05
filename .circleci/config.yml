@@ -120,7 +120,6 @@ commands:
         default: ""
         type: string
     steps:
-      - checkout
       - slack-notify-co:
           notify-text: "Compiling project and checkpointing..."
       - run:
@@ -129,19 +128,22 @@ commands:
       - run:
           name: Run pre-commit
           command: cd dw && pre-commit run --all-files
-      #- run:
-          #name: Run dbt docs
-          #command: cd dw && dbt docs generate --target-path ../docs
-      #- run:
-          #name: Push docs
-          #command: |
-            #cd dw
-            # need email and name to confirm identity
-            #git config --global user.email "hughesdatatech@gmail.com"
-            #git config --global user.name "$CIRCLE_USERNAME"
-            #git add ../docs/
-            #git commit -m "[skip ci]"
-            #git push --repo="$CIRCLE_REPOSITORY_URL" --set-upstream origin development
+
+  docs-dbt-co:
+    steps:
+      - run:
+          name: Run dbt docs
+          command: cd dw && dbt docs generate --target-path ../docs
+      - run:
+          name: Push docs
+          command: |
+            cd dw
+            # email and name are required to confirm identity
+            git config --global user.email "hughesdatatech@gmail.com"
+            git config --global user.name "$CIRCLE_USERNAME"
+            git add ../docs/
+            git commit -m "[skip ci] dbt docs gen"
+            git push --repo="$CIRCLE_REPOSITORY_URL" --set-upstream origin development
       
   setup-and-compile-co:
     parameters:
@@ -164,7 +166,7 @@ commands:
           notify-text: "Meltano extract/load starting..."
       - run:
           name: Generate state for .env file
-          command: cd dw-meltano/dw-ownbackup && python gen_state.py << pipeline.parameters.gen-state-args >>
+          command: cd dw-meltano/dw-ownbackup && python gen_statex.py << pipeline.parameters.gen-state-args >>
       - run:
           name: Extract/load json data
           command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
