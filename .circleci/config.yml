@@ -52,16 +52,7 @@ commands:
                 }
               ]
             }
-          event: always
-
-  install-requirements-co:
-    steps:
-      - slack-notify-co:
-          notify-text: "python requirements installation starting..."
-      - python/install-packages:
-            pkg-manager: pip
-            app-dir: ~/.dbt/  # if your requirements.txt isn't in the root directory.
-            # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.          
+          event: always          
 
   setup-and-install-requirements-co:
     steps:
@@ -105,7 +96,7 @@ commands:
             app-dir: ~/.dbt/  # if your requirements.txt isn't in the root directory.
             # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
 
-  setup-and-compile-dbt-co:
+  compile-dbt-co:
     parameters:
       compile-params:
         description: Optional arguments to be passed to the dbt compile command
@@ -114,22 +105,7 @@ commands:
     steps:
       - checkout
       - slack-notify-co:
-          notify-text: "dbt setup and compile starting..."
-      - run:
-          name: Set up dbt profile
-          command: |
-            mkdir -p ~/.dbt
-            mv .circleci/profiles.yml ~/.dbt/profiles.yml 
-            cat  ~/.dbt/profiles.yml
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_ACCOUNT/${CCI_TARGET_SNOWFLAKE_ACCOUNT}/g" ~/.dbt/profiles.yml
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" ~/.dbt/profiles.yml
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_PASSWORD/${CCI_TARGET_SNOWFLAKE_PASSWORD}/g" ~/.dbt/profiles.yml
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_ROLE/${CCI_TARGET_SNOWFLAKE_ROLE}/g" ~/.dbt/profiles.yml
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" ~/.dbt/profiles.yml
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" ~/.dbt/profiles.yml
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" ~/.dbt/profiles.yml
-            mv .circleci/requirements.txt  ~/.dbt/requirements.txt
-
+          notify-text: "Compile dbt project and checkpoint starting..."
       - run:
           name: Run dbt deps
           command: cd dw && dbt deps
@@ -139,19 +115,19 @@ commands:
       - run:
           name: Run pre-commit
           command: cd dw && pre-commit run --all-files
-      - run:
-          name: Run dbt docs
-          command: cd dw && dbt docs generate --target-path ../docs
-      - run:
-          name: Push docs
-          command: |
-            cd dw
+      #- run:
+          #name: Run dbt docs
+          #command: cd dw && dbt docs generate --target-path ../docs
+      #- run:
+          #name: Push docs
+          #command: |
+            #cd dw
             # need email and name to confirm identity
-            git config --global user.email "hughesdatatech@gmail.com"
-            git config --global user.name "$CIRCLE_USERNAME"
-            git add ../docs/
-            git commit -m "[skip ci]"
-            git push --repo="$CIRCLE_REPOSITORY_URL" --set-upstream origin development
+            #git config --global user.email "hughesdatatech@gmail.com"
+            #git config --global user.name "$CIRCLE_USERNAME"
+            #git add ../docs/
+            #git commit -m "[skip ci]"
+            #git push --repo="$CIRCLE_REPOSITORY_URL" --set-upstream origin development
       
   setup-and-compile-co:
     parameters:
@@ -409,8 +385,8 @@ jobs: #-jb
     docker:
       - image: cimg/python:3.9.7
     steps:
-      #- setup-and-compile-co:
       - setup-and-install-requirements-co
+      - compile-dbt-co
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
