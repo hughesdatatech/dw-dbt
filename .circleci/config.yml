@@ -27,6 +27,34 @@ parameters: #-pp
     default: ""
 
 commands:
+
+  slack-notify-co:
+    parameters:
+      notify-text:
+        description: Notification text to be sent to Slack
+        default: "This is a test"
+        type: string
+    steps:
+      - checkout
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "plain_text",
+                      "text": "<<parameters.notify-text>>",
+                      "emoji": true
+                    }
+                  ]
+                }
+              ]
+            }
+          event: always
+
   setup-and-compile-dbt-co:
     parameters:
       compile-params:
@@ -35,6 +63,7 @@ commands:
         type: string
     steps:
       - checkout
+      - slack-notify-co
       - run:
           name: Set up dbt profile
           command: |
