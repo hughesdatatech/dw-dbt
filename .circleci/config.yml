@@ -67,7 +67,7 @@ commands:
     steps:
       - checkout
       - slack-notify-co:
-          notify-text: "Setup and install requirements starting..."
+          notify-text: "Environment variable replacement starting..."
       - run:
           name: Setup and install requirements
           command: |
@@ -81,7 +81,7 @@ commands:
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" ~/.dbt/profiles.yml
-            cat  ~/.dbt/profiles.yml
+            #cat  ~/.dbt/profiles.yml
             # For Meltano env
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" .circleci/.env
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_PASSWORD/${CCI_TARGET_SNOWFLAKE_PASSWORD}/g" .circleci/.env
@@ -96,9 +96,14 @@ commands:
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID/${CCI_TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID}/g" .circleci/.env
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY/${CCI_TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY}/g" .circleci/.env
             mv .circleci/.env dw-meltano/dw-ownbackup/.env
-            cat dw-meltano/dw-ownbackup/.env
+            #cat dw-meltano/dw-ownbackup/.env
             mv .circleci/requirements.txt  ~/.dbt/requirements.txt
-      - install-requirements-co 
+      - slack-notify-co:
+          notify-text: "Python requirements installation starting..."
+      - python/install-packages:
+            pkg-manager: pip
+            app-dir: ~/.dbt/  # if your requirements.txt isn't in the root directory.
+            # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
 
   setup-and-compile-dbt-co:
     parameters:
@@ -124,7 +129,7 @@ commands:
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" ~/.dbt/profiles.yml
             mv .circleci/requirements.txt  ~/.dbt/requirements.txt
-      - install-requirements-co 
+
       - run:
           name: Run dbt deps
           command: cd dw && dbt deps
