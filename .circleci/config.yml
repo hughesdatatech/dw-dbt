@@ -227,24 +227,7 @@ jobs: #-jb
           event: fail
           template: basic_fail_1
 
-  setup-and-compile-dbt-jb:
-    docker:
-      - image: cimg/python:3.9.7
-    steps:
-      - setup-and-install-requirements-co
-      - compile-dbt-co
-      - extract-and-load-co
-      - build-dbt-co
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: pass
-          template: basic_success_1
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1
-
-  dbt-sf-runner-daily-jb:
+  sf-runner-elt-jb:
     docker:
       - image: cimg/python:3.9.7
     steps:
@@ -408,21 +391,20 @@ workflows: #-wf
         - equal: [ "dev-push-dbt", << pipeline.parameters.manual-trigger-pp >> ]
         - equal: [ "webhook", << pipeline.trigger_source >> ]
     jobs:
-      #- dev-push-dbt-jb:
-      - setup-and-compile-dbt-jb:
+      - dev-push-dbt-jb:
           filters:
             branches:
               only: 
                 - development
 
   # Daily scheduled workflow for the entire pipeline, excluding monthly PIT tables (or manual trigger)
-  scheduled-pipeline-daily-wf: 
+  sf-runner-elt-wf: 
     when:
       or:
-        - equal: [ "dbt-sf-runner-daily", << pipeline.parameters.manual-trigger-pp >> ]
-        - equal: [ "dbt-sf-runner-daily", << pipeline.schedule.name >> ]
+        - equal: [ "sf-runner-elt", << pipeline.parameters.manual-trigger-pp >> ]
+        - equal: [ "sf-runner-elt", << pipeline.schedule.name >> ]
     jobs:
-      - dbt-sf-runner-daily-jb
+      - sf-runner-elt-jb
 
   # EL only via manual trigger
   manual-pipeline-el-only-wf: 
