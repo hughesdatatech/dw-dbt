@@ -55,6 +55,15 @@ commands:
             }
           event: always
 
+  install-requirements-co:
+    steps:
+      - slack-notify-co:
+          notify-text: "python requirements installation starting..."
+      - python/install-packages:
+            pkg-manager: pip
+            app-dir: ~/.dbt/  # if your requirements.txt isn't in the root directory.
+            # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.          
+
   setup-and-compile-dbt-co:
     parameters:
       compile-params:
@@ -363,6 +372,7 @@ jobs: #-jb
       - image: cimg/python:3.9.7
     steps:
       #- setup-and-compile-co:
+      - install-requirements-co
       - setup-and-compile-dbt-co:
           compile-params: ""
       - slack/notify:
