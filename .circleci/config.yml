@@ -61,7 +61,7 @@ commands:
     steps:
       - checkout
       - slack-notify-co:
-          notify-text: "Environment variable replacement starting..."
+          notify-text: "Replacing secrets..."
       - run:
           name: Setup and install requirements
           command: |
@@ -93,13 +93,13 @@ commands:
             #cat dw-meltano/dw-ownbackup/.env
             mv .circleci/requirements.txt  ~/.dbt/requirements.txt
       - slack-notify-co:
-          notify-text: "Python requirements installation starting..."
+          notify-text: "Installing Python reqs..."
       - python/install-packages:
             pkg-manager: pip
             app-dir: ~/.dbt/  # if your requirements.txt isn't in the root directory.
             # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
       - slack-notify-co:
-          notify-text: "dbt deps and Meltano installation starting..."
+          notify-text: "Installing dbt deps and Meltano..."
       - run:
           name: Run dbt deps
           command: cd dw && dbt deps
@@ -122,10 +122,7 @@ commands:
     steps:
       - checkout
       - slack-notify-co:
-          notify-text: "Compile dbt project and checkpoint starting..."
-      #- run:
-          #name: Run dbt deps
-          #command: cd dw && dbt deps
+          notify-text: "Compiling project and checkpointing..."
       - run:
           name: Run dbt compile
           command: cd dw && dbt compile <<parameters.compile-params>>
@@ -154,103 +151,7 @@ commands:
         type: string
     steps:
       - checkout
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "starting dbt/meltano installation, and project parse/compile...",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: always
-      - run:
-          name: Set up dbt profile and meltano .env vars
-          command: |
-            mkdir -p ~/.dbt
-            mv .circleci/profiles.yml ~/.dbt/profiles.yml 
-            cat  ~/.dbt/profiles.yml
-            mv .circleci/requirements.txt  ~/.dbt/requirements.txt
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_PASSWORD/${CCI_TARGET_SNOWFLAKE_PASSWORD}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_ACCOUNT/${CCI_TARGET_SNOWFLAKE_ACCOUNT}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA/${CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_FILE_FORMAT/${CCI_TARGET_SNOWFLAKE_FILE_FORMAT}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_S3_BUCKET/${CCI_TARGET_SNOWFLAKE_S3_BUCKET}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_STAGE/${CCI_TARGET_SNOWFLAKE_STAGE}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID/${CCI_TARGET_SNOWFLAKE_AWS_ACCESS_KEY_ID}/g" .circleci/.env
-            sed -i -e "s/CCI_TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY/${CCI_TARGET_SNOWFLAKE_AWS_SECRET_ACCESS_KEY}/g" .circleci/.env
-            mv .circleci/.env dw-meltano/dw-ownbackup/.env
-            cat dw-meltano/dw-ownbackup/.env
-      - python/install-packages:
-          pkg-manager: pip
-          app-dir: ~/.dbt/  # if your requirements.txt isn't in the root directory.
-          # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements. 
-      - run:
-          name: Run dbt deps
-          command: cd dw && dbt deps
-      - run:
-          name: Install meltano
-          command: pipx install "meltano"
-      - run:
-          name: Install rest api extractor
-          command: cd dw-meltano/dw-ownbackup && meltano install extractor tap-rest-api-msdk
-      - run:
-          name: Install snowflake loader
-          command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
-      - run:
-          name: Run dbt parse
-          command: cd dw && dbt parse
-      - run:
-          name: Run dbt compile
-          command: cd dw && dbt compile <<parameters.compile-params>>
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "dbt/meltano installation, and project parse/compile succeeded!",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: pass
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "dbt/meltano installation, and project parse/compile failed!",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: fail
+      # command is to be replace
 
   extract-and-load-co:
     parameters:
@@ -358,6 +259,7 @@ jobs: #-jb
     steps:
       - setup-and-install-requirements-co
       - compile-dbt-co
+      - extract-and-load-co
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
@@ -505,14 +407,14 @@ jobs: #-jb
           event: fail
           template: basic_fail_1
 
-  create-a-pr:
-    docker:
-      - image: cimg/python:3.9.7
-    steps:
-      - checkout
-      - run:
-          name: git test
-          command: cd dw && git --help
+  #create-a-pr:
+    #docker:
+      #- image: cimg/python:3.9.7
+    #steps:
+      #- checkout
+      #- run:
+          #name: git test
+          #command: cd dw && git --help
       #- gh/setup
       #- run:
           #command: |
@@ -522,14 +424,6 @@ jobs: #-jb
              
 workflows: #-wf
   version: 2
-
-  use-my-orb:
-    when:
-      or:
-        - equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
-        #- equal: [ "webhook", << pipeline.trigger_source >> ]
-    jobs:
-      - create-a-pr
 
   # Setup and compile workflow, triggered upon push to main or development (or manual trigger)
   setup-and-compile-wf:
