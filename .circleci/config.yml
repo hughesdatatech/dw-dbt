@@ -64,6 +64,7 @@ commands:
     steps:
       - checkout
       - slack-notify-co
+          notify-text: "dbt setup and compile starting..."
       - run:
           name: Set up dbt profile
           command: |
