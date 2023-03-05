@@ -405,8 +405,7 @@ jobs: #-jb
       - image: cimg/python:3.9.7
     steps:
       #- setup-and-compile-co:
-      - setup-and-compile-dbt-co:
-          compile-params: ""
+      - setup-and-install-requirements-co:
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
@@ -587,7 +586,7 @@ workflows: #-wf
         - equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
         - equal: [ "webhook", << pipeline.trigger_source >> ]
     jobs:
-      - setup-and-install-requirements-co:
+      - setup-and-compile-dbt-jb:
           filters:
             branches:
               only: 
