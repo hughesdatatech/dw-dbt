@@ -10,11 +10,11 @@ all_source_rows as (
     
         'dw_dev.pagov.opioid_stays' as rv_pagov__opioid_stays_rec_source,
     
-    '98ea9b52-2726-41dc-b329-e1446cd1dd39' as rv_pagov__opioid_stays_job_id,
+    '3b2b8a1b-46ea-4a6c-a377-54047d96cceb' as rv_pagov__opioid_stays_job_id,
     'circleci' as rv_pagov__opioid_stays_job_user_id,
     'default' as rv_pagov__opioid_stays_jira_task_key,
-    to_char(timestamp '2023-03-05 19:18:12.447778+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp  as rv_pagov__opioid_stays_extracted_at,
-    to_char(timestamp '2023-03-05 19:18:12.447778+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp rv_pagov__opioid_stays_loaded_at,
+    to_char(timestamp '2023-03-05 19:34:18.328549+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp  as rv_pagov__opioid_stays_extracted_at,
+    to_char(timestamp '2023-03-05 19:34:18.328549+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp rv_pagov__opioid_stays_loaded_at,
     cast(sha2(nvl(trim(cast(COUNT_OF_MATERNAL_STAYS_WITH as varchar)), '') || '||' || nvl(trim(cast(COUNTY_CODE_NUMBER as varchar)), '') || '||' || nvl(trim(cast(COUNTY_FIPS_CODE as varchar)), '') || '||' || nvl(trim(cast(FIPS_COUNTY_CODE as varchar)), '') || '||' || nvl(trim(cast(GEOCODED_COLUMN_COORDINATES as varchar)), '') || '||' || nvl(trim(cast(GEOCODED_COLUMN_TYPE as varchar)), '') || '||' || nvl(trim(cast(LATITUDE_LONGITUDE as varchar)), '') || '||' || nvl(trim(cast(RATE_OF_MATERNAL_STAYS_WITH as varchar)), '') || '||' || nvl(trim(cast(STATE_FIPS_CODE as varchar)), '') || '||' || nvl(trim(cast(TIME_PERIOD as varchar)), '') || '||' || nvl(trim(cast(TIME_PERIOD_DATE_START as varchar)), '') || '||' || nvl(trim(cast(TYPE_OF_COUNT as varchar)), '') || '||' || nvl(trim(cast(TYPE_OF_RATE as varchar)), ''), 256) as varbinary(64)) rv_pagov__opioid_stays_hd
     ,
         COUNT_OF_MATERNAL_STAYS_WITH, 
