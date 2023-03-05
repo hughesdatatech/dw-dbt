@@ -83,7 +83,7 @@ commands:
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" ~/.dbt/profiles.yml
             cat  ~/.dbt/profiles.yml
             # For Meltano env
-            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" .circleci/.env
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" .circleci/.env
             #sed -i -e "s/CCI_TARGET_SNOWFLAKE_PASSWORD/${CCI_TARGET_SNOWFLAKE_PASSWORD}/g" .circleci/.env
             #sed -i -e "s/CCI_TARGET_SNOWFLAKE_ACCOUNT/${CCI_TARGET_SNOWFLAKE_ACCOUNT}/g" .circleci/.env
             #sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" .circleci/.env
