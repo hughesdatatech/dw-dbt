@@ -131,6 +131,8 @@ commands:
 
   docs-dbt-co:
     steps:
+      - slack-notify-co:
+          notify-text: "Generating docs..."
       - run:
           name: Run dbt docs
           command: cd dw && dbt docs generate --target-path ../docs
@@ -188,70 +190,24 @@ commands:
           name: Run dbt run-operation
           command: cd dw && dbt run-operation process_log_handler <<parameters.run-params>>
       
-  dbt-build-co:
+  build-dbt-co:
     parameters:
       build-params:
         description: Optional arguments to be passed to the dbt build command
         default: "--exclude tag:demo tag:pit"
         type: string
     steps:
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "starting dbt transform...",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: always
+      - slack-notify-co:
+          notify-text: "dbt transform starting..."
       - run:
           name: Run dbt build
           command: cd dw && dbt build <<parameters.build-params>>
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "dbt transform succeeded!",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: pass
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "dbt transform failed!",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: fail
+      - slack-notify-co:
+          notify-text: "dbt transform succeeded!"
+          on-event: "pass"
+      - slack-notify-co:
+          notify-text: "dbt transform failed!"
+          on-event: "fail"
 
 jobs: #-jb
 
@@ -278,6 +234,7 @@ jobs: #-jb
       - setup-and-install-requirements-co
       - compile-dbt-co
       - extract-and-load-co
+      - build-dbt-co
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
@@ -291,7 +248,8 @@ jobs: #-jb
     docker:
       - image: cimg/python:3.9.7
     steps:
-      - setup-and-compile-co:
+      - setup-and-install-requirements-co
+      - compile-dbt-co:
           compile-params: >
             --vars '{
             << pipeline.parameters.dbt-metadata-vars >>,
@@ -320,7 +278,7 @@ jobs: #-jb
             << pipeline.parameters.dbt-metadata-vars >>,
             object_identifier_override: dw-meltano
             }'
-      - dbt-build-co:
+      - build-dbt-co:
           build-params: >
             --exclude tag:demo tag:pit 
             --vars '{ 
@@ -397,7 +355,7 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: ""
-      - dbt-build-co:
+      - build-dbt-co:
           build-params: "--exclude tag:demo"
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
@@ -414,7 +372,7 @@ jobs: #-jb
     steps:
       - setup-and-compile-co:
           compile-params: "--target arc_test"
-      - dbt-build-co:
+      - build-dbt-co:
           build-params: "--target arc_test << pipeline.parameters.dbt-test-vars >> --exclude tag:demo"
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
@@ -454,20 +412,6 @@ workflows: #-wf
           filters:
             branches:
               only: 
-                - development
-
-  # Setup and compile workflow, triggered upon push to main or development (or manual trigger)
-  setup-and-compile-wf:
-    when:
-      or:
-        - equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
-        #- equal: [ "webhook", << pipeline.trigger_source >> ]
-    jobs:
-      - setup-and-compile-dbt-jb:
-          filters:
-            branches:
-              only: 
-                #- main
                 - development
 
   # Daily scheduled workflow for the entire pipeline, excluding monthly PIT tables (or manual trigger)
