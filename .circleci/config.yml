@@ -34,6 +34,9 @@ commands:
         description: Notification text to be sent to Slack
         default: ""
         type: string
+      on-event:
+        default: "always"
+        type: string
     steps:
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
@@ -52,7 +55,7 @@ commands:
                 }
               ]
             }
-          event: always          
+          event: <<parameters.on-event>>          
 
   setup-and-install-requirements-co:
     steps:
@@ -253,69 +256,23 @@ commands:
     parameters:
       run-params:
         description: Optional arguments to be passed to the meltano run command
-        default: "--exclude tag:demo tag:pit"
+        default: ""
         type: string
     steps:
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "starting meltano extract/load...",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: always
+      - slack-notify-co:
+          notify-text: "Meltano extract/load starting..."
       - run:
           name: Generate state for .env file
           command: cd dw-meltano/dw-ownbackup && python gen_state.py << pipeline.parameters.gen-state-args >>
       - run:
           name: Extract/load json data
           command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "meltano extract/load succeeded!",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: pass
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "meltano extract/load failed!",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: fail
+      - slack-notify-co:
+          notify-text: "Meltano extract/load succeeded!"
+          on-event: "pass"
+      - slack-notify-co:
+          notify-text: "Meltano extract/load failed!"
+          on-event: "fail"
 
   log-pipeline-action-co:
     parameters:
