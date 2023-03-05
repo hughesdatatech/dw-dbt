@@ -88,8 +88,8 @@ commands:
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_ACCOUNT/${CCI_TARGET_SNOWFLAKE_ACCOUNT}/g" .circleci/.env
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" .circleci/.env
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" .circleci/.env
-            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA/${CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA}/g" .circleci/.env
-            #sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" .circleci/.env
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA/${CCI_TARGET_SNOWFLAKE_DEFAULT_TARGET_SCHEMA}/g" .circleci/.env
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" .circleci/.env
             #sed -i -e "s/CCI_TARGET_SNOWFLAKE_FILE_FORMAT/${CCI_TARGET_SNOWFLAKE_FILE_FORMAT}/g" .circleci/.env
             #sed -i -e "s/CCI_TARGET_SNOWFLAKE_S3_BUCKET/${CCI_TARGET_SNOWFLAKE_S3_BUCKET}/g" .circleci/.env
             #sed -i -e "s/CCI_TARGET_SNOWFLAKE_STAGE/${CCI_TARGET_SNOWFLAKE_STAGE}/g" .circleci/.env
