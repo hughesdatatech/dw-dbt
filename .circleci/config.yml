@@ -32,7 +32,7 @@ commands:
     parameters:
       notify-text:
         description: Notification text to be sent to Slack
-        default: "This is a test"
+        default: ""
         type: string
     steps:
       - checkout
@@ -63,7 +63,7 @@ commands:
         type: string
     steps:
       - checkout
-      - slack-notify-co
+      - slack-notify-co:
           notify-text: "dbt setup and compile starting..."
       - run:
           name: Set up dbt profile
