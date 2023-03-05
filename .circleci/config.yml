@@ -166,7 +166,7 @@ commands:
           notify-text: "Meltano extract/load starting..."
       - run:
           name: Generate state for .env file
-          command: cd dw-meltano/dw-ownbackup && python gen_statex.py << pipeline.parameters.gen-state-args >>
+          command: cd dw-meltano/dw-ownbackup && python gen_state.py << pipeline.parameters.gen-state-args >>
       - run:
           name: Extract/load json data
           command: cd dw-meltano/dw-ownbackup && meltano run tap-rest-api-msdk target-snowflake
@@ -254,6 +254,22 @@ commands:
           event: fail
 
 jobs: #-jb
+
+  dev-push-dbt-jb:
+    docker:
+      - image: cimg/python:3.9.7
+    steps:
+      - setup-and-install-requirements-co
+      - compile-dbt-co
+      - docs-dbt-co
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
 
   setup-and-compile-dbt-jb:
     docker:
@@ -427,12 +443,25 @@ jobs: #-jb
 workflows: #-wf
   version: 2
 
+   # Development push workflow, triggered upon push to development (or manual trigger)
+  dev-push-dbt-wf:
+    when:
+      or:
+        - equal: [ "dev-push-dbt", << pipeline.parameters.manual-trigger-pp >> ]
+        - equal: [ "webhook", << pipeline.trigger_source >> ]
+    jobs:
+      - dev-push-dbt-jb:
+          filters:
+            branches:
+              only: 
+                - development
+
   # Setup and compile workflow, triggered upon push to main or development (or manual trigger)
   setup-and-compile-wf:
     when:
       or:
         - equal: [ "setup-and-compile", << pipeline.parameters.manual-trigger-pp >> ]
-        - equal: [ "webhook", << pipeline.trigger_source >> ]
+        #- equal: [ "webhook", << pipeline.trigger_source >> ]
     jobs:
       - setup-and-compile-dbt-jb:
           filters:
