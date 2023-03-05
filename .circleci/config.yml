@@ -405,7 +405,7 @@ jobs: #-jb
       - image: cimg/python:3.9.7
     steps:
       #- setup-and-compile-co:
-      - setup-and-install-requirements-co:
+      - setup-and-install-requirements-co
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: pass
