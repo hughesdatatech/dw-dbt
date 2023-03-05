@@ -95,6 +95,20 @@ commands:
             pkg-manager: pip
             app-dir: ~/.dbt/  # if your requirements.txt isn't in the root directory.
             # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
+      - slack-notify-co:
+          notify-text: "dbt deps and Meltano installation starting..."
+      - run:
+          name: Run dbt deps
+          command: cd dw && dbt deps
+      - run:
+          name: Install meltano
+          command: pipx install "meltano"
+      - run:
+          name: Install rest api extractor
+          command: cd dw-meltano/dw-ownbackup && meltano install extractor tap-rest-api-msdk
+      - run:
+          name: Install snowflake loader
+          command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
 
   compile-dbt-co:
     parameters:
@@ -106,9 +120,9 @@ commands:
       - checkout
       - slack-notify-co:
           notify-text: "Compile dbt project and checkpoint starting..."
-      - run:
-          name: Run dbt deps
-          command: cd dw && dbt deps
+      #- run:
+          #name: Run dbt deps
+          #command: cd dw && dbt deps
       - run:
           name: Run dbt compile
           command: cd dw && dbt compile <<parameters.compile-params>>
