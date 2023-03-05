@@ -44,6 +44,7 @@ commands:
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_ACCOUNT/${CCI_TARGET_SNOWFLAKE_ACCOUNT}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_USER/${CCI_TARGET_SNOWFLAKE_USER}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_PASSWORD/${CCI_TARGET_SNOWFLAKE_PASSWORD}/g" ~/.dbt/profiles.yml
+            sed -i -e "s/CCI_TARGET_SNOWFLAKE_ROLE/${CCI_TARGET_SNOWFLAKE_ROLE}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBNAME/${CCI_TARGET_SNOWFLAKE_DBNAME}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_WAREHOUSE/${CCI_TARGET_SNOWFLAKE_WAREHOUSE}/g" ~/.dbt/profiles.yml
             sed -i -e "s/CCI_TARGET_SNOWFLAKE_DBT_SCHEMA/${CCI_TARGET_SNOWFLAKE_DBT_SCHEMA}/g" ~/.dbt/profiles.yml
