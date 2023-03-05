@@ -1,4 +1,4 @@
-# ds-dbt Model, Project Structure, and Style Guide
+# dbt Model, Project Structure, and Style Guide
 
 [For reference, dbt's official style guide](https://github.com/dbt-labs/corp/blob/main/dbt_style_guide.md)
 
@@ -95,13 +95,14 @@ Our models are organized into file and folder structures as follows (using the S
 * _NB: two underscores separate schema name from table name._
 * Raw vault snapshots are considered separate models, but they are configured simply in files named for data source schemas.
 * Each schema has one file containing all the configured snapshots for its tables — one for `stripe_mobile`, one for `talktala_production`, etc.
-* Dependencies: Raw Vault snapshots should be built from exactly one staging model.
-* Model materialization: not configurable, but snapshots behave like incremental tables.
+* Dependencies: Raw vault snapshots should be built from exactly one staging model.
+* Model materialization: not configurable (but snapshots behave like incremental tables)
 * Primary folder: snapshots\2_raw_vault\schema_name
 
 ### 3. Business Rule Models
 
 * Business rule models are named and organized into folders and sub-folders corresponding to either the table and schema from which they are being loaded, or the business concept they represent.
+* Dependencies: Business rule models should be built from raw vault models or other business rule models (more details provided below)
 * Model materialization: view
 * Primary folder: 3_business_rule\data_source_name\schema_name\concept_name
 
@@ -109,15 +110,15 @@ Our models are organized into file and folder structures as follows (using the S
 
 #### Type 1: "Base" Business Rules
 
-* Type-1 `base` business rule models prepare staging tables for later use. Base models rename fields to business-friendly terms, do general data cleanup, coalesce nulls, do basic field calculations, or other prep work. 
-* Base business rules are named in the format `br_<source_schema_name>_<source_table_name>`, e.g. `br_stripe_mobile_balance_transactions`. (Note only one underscore between schema name and table name.) Base business rules also live in their own subfolder within the business rules folder.
-* Dependencies: In most cases, `base` business rule models will be built from one staging model.
+* Type-1 `base` business rules prepare raw vault tables for later use. Base models rename fields to business-friendly terms, do general data cleanup, coalesce nulls, perform basic field calculations, or other prep work. 
+* Base business rules are named in the format `br_<source_schema_name>_<source_table_name>`, e.g. `br_stripe_mobile_balance_transactions`. (_NB: only one underscore between schema name and table name.) Base business rules also live in their own subfolder within the business rules folder.
+* Dependencies: In most cases, `base` business rule models will be built from one raw vault model.
 
 #### Type 2: "Concept" Business Rules
 
-* Type-2 business rule models represent business _concepts_. They go a step further from base br models, and begin to shape, transform, and alter data, _or_ join together multiple models to implement more complex rules. 
+* Type-2 `concept` business rules represent business _concepts_. They go a step further from base br models, and begin to shape, transform, and alter data, _or_ join together multiple models to implement more complex rules. 
 * Business concept models are named according to the primary business concept they represent, in the format `br_<business_concept_name>`, e.g. `br_claim`. (_NB: the business concept name is singular, not plural._)
-* Dependencies: Business concept models can built from one or more other business rule models, or staging models.
+* Dependencies: Business concept models can built from one or more other business rule models, or raw vault models.
 
 ### 4. Information Mart Models
 
@@ -128,8 +129,7 @@ Our models are organized into file and folder structures as follows (using the S
 
 * Information marts that provide current-value (i.e. "present-tense") data should be in the format `im_<concept_name>`. For example, `im_claim` is a claim information mart containing only current-value data for all claim attributes.
 * Current-value information marts are the most basic and should be implemented first.
-* Dependencies: Current-value information marts are typically dependent on one or more business rule models, and may depend on other information marts. 
-    * We might base an information mart on another information mart according to how much data processing we need to create an output. If multiple information marts rely on a resource-intensive calculation, for example, then it's probably best to do the calculation _once_ in one information mart. From there, any other information marts that need the same calculation can be built leveraging the calculation that was done in the first information mart.
+* Dependencies: Current-value information marts are typically dependent on one or more business rule models, and may depend on other information marts. For example, we might base an information mart on another information mart according to how much data processing we need to create an output. If multiple information marts rely on a resource-intensive calculation, then it's probably best to do the calculation _once_ in one information mart. From there, any other information marts that need the same calculation can be built leveraging the calculation that was done in the first information mart.
 * Model materialization: table (full reload)
 * Primary folder: 4_info_mart\concept_name\current
 
@@ -145,7 +145,7 @@ Our models are organized into file and folder structures as follows (using the S
 #### C. Point in Time (PIT) Data Information Marts
 
 * Point-in-time information marts provide a periodic image of what data looked like at a certain point in time. Name them in the format `im_<concept_name>_pit`. For example,  `im_claim_pit` is a claim information mart containing a record of all claims _as of_ a specified periodic interval (e.g. monthly, quarterly, etc.)
-* _NB1: The difference between a `_hist` and `_pit` mart is that a `_hist` mart tracks changes only whereas a `_pit` mart contains a record for each entity regardless of any changes that have or have not occurred since the prior `pit` load._
+* _NB: The difference between a `_hist` and `_pit` mart is that a `_hist` mart tracks changes only whereas a `_pit` mart contains a record for each entity regardless of any changes that have or have not occurred since the prior `pit` load._
     * `_hist` example: Let's say `im_claim_hist` is being loaded several times a day, and that we have a claim in the mart, `claim_id 24601`. Every time we load the mart table, dbt creates a new record _only_ if `claim_id 24601` has not already been loaded, or if a tracked attribute in `claim_id 24601` has changed since the prior load. 
     * `_pit` example: Let's say `im_claim_pit` is being loaded monthly, and that we still have `claim_id 24601`. With each monthly load, a new record is inserted for `claim_id 24601` each time we take the monthly `pit` image, even if nothing in `claim_id 24601` has changed since the prior load. This is because the purpose of a `_pit` mart is to summarize all activity (or non-activity) during or at the end of a time span, rather than capture changes. This is akin to a type of fact table in dimensional modeling known as a *periodic snapshot*.
     * As alluded to in the example, all reporting entities will appear in each `_pit` image, even if there's no activity since the prior load.
@@ -174,7 +174,7 @@ Our models are organized into file and folder structures as follows (using the S
 ### User-facing Mart Views
 
 To recap, there are two mart layers: _information_ marts and _metrics_ marts.
-* It's good practice to only make information marts and metrics marts accessible to users through **views**, because then it's easier to make modifications to any underlying physical artifacts (i.e. tables) the views are based on, without adversely impacting who or what tool may be accessing the data. In other words, the views essentially function as interfaces to the data, with the details hidden behind the facade a user or tool is presented with. 
+* It's good practice to make information marts and metrics marts accessible to users only through **views**, because then it's easier to make modifications to any underlying physical artifacts (i.e. tables) the views are based on, without adversely impacting who or what may be accessing the data. In other words, the views function essentially as interfaces to the data, with the details of how those data are organized hidden behind the facade a user, business intelligence software, or other tool is presented with. 
 * The view names should mirror the format of the original information marts or metrics marts they are selecting data from, but prefixed with a `v` to distinguish them from the original tables. For example, `vim_claim` is a user-facing information mart view based on the original `im_claim` table, and `vmm_balance_transaction` is a user-facing metrics mart view based on the physical `mm_balance_transaction` table.
 * Dependencies: Information mart views are typically based on a single, physical information mart. Metrics mart views are typically based on a single, physical metrics mart.
 * Model materialization: view
@@ -227,7 +227,7 @@ where true
 
 ## SQL Style Guidelines
 
-- Use trailing commas
+- Use trailing commas.
 - Always add `where true` condition, and add additional filters below with indents. 
 - Indents should be four spaces (except for predicates, which should line up with the `where` keyword).
 - No need to indent or work on the next line if you're only selecting from one table. For example:
@@ -301,7 +301,7 @@ Here's an abbreviated example from the `session_report` information mart:
 - In the select, state fields before aggregates / window functions.
 - Execute aggregations as early as possible, before joining to another table.
 - Ordering and grouping by a number (eg. group by 1, 2) is preferred over listing the column names (see [this rant](https://blog.getdbt.com/write-better-sql-a-defense-of-group-by-1/) for why).
-- Prefer `union all` to `union` [*](http://docs.aws.amazon.com/redshift/latest/dg/c_example_unionall_query.html)
+- Prefer `union all` to `union` [*](http://docs.aws.amazon.com/redshift/latest/dg/c_example_unionall_query.html).
 - Do not use single-letter aliases for tables. If a table has a single-word name (e.g. `plan` or `charges`), keep the table name or use a shortened version (e.g. `chg` for `charges`).
 - Be careful about abbreviating two-word tables with common abbreviations; `pt` could be `payment_transactions`, `payment_type`, `private_talks`, etc. In these scenarios, refer to the Confluence table documentation for suggested abbreviations (e.g. we customarily shorten `payment_transactions` to `tx`).
 - If joining two or more tables, _always_ prefix your column names with the table alias. If only selecting from one table, you don't need prefixes, but they're encouraged.
