@@ -237,6 +237,16 @@ vars:
   #
   ########################################################################################################################
 
+  us_softball_league_metadata:
+      col_0: ['int', 'id']
+      col_1: ['varchar(100)', 'name']
+      col_2: ['date', 'date_of_birth']
+      col_3: ['int', 'company_id']
+      col_4: ['date', 'last_active']
+      col_5: ['int', 'score']
+      col_6: ['int', 'joined_league']
+      col_7: ['varchar(50)', 'us_state']
+
   stg_pagov__model_config:
       pagov__opioid_stays: 
         track_key_deletes: false 

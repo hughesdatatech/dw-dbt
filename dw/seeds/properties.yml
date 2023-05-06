@@ -1,0 +1,26 @@
+version: 2
+
+seeds:
+  - name: ref_hh_unity_golf_club__members
+    config:
+      column_types:
+        id: int
+        first_name: varchar(50)
+        last_name: varchar(50)
+        dob: varchar(50)
+        company_id: int
+        last_active: varchar(50)
+        score: int
+        member_since: int
+        state: varchar(50)
+
+  - name: ref_hh_us_softball_league__members
+    config:
+      column_types:
+        tsv_value: varchar
+
+  - name: ref_hh_master__companies
+    config:
+      column_types:
+        id: int
+        name: varchar(200)
