@@ -21,10 +21,13 @@ final as (
 )
 
 select
+    {#
+        TO DO: leverage macros so that metadata and column names are more auto-generated.
+    #}
     'default' as rv_hh_us_softball_league__members_tenant_key,
     cast(sha2(nvl(trim(cast(id as varchar)), ''), 256) as varbinary(64)) as rv_hh_us_softball_league__members_hk,
-    'ref_hh_us_softball_league.csv' as rv_hh_us_softball_league__members_rec_source,
-    {{ build_job_id(invocation_id, 'rv_hh_us_softball_league__members_job_id') }},
+    'ref_hh_us_softball_league__members.csv' as rv_hh_us_softball_league__members_rec_source,
+    {{ build_job_id(invocation_id, 'rv_hh_us_softball_league__members') }},
     'circleci' as rv_hh_us_softball_league__members_job_user_id,
     'default' as rv_hh_us_softball_league__members_jira_task_key,
     {{ build_loaded_at(alias='null') }}  as rv_hh_us_softball_league__members_extracted_at,
