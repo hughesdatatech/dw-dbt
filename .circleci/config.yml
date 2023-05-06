@@ -155,7 +155,7 @@ commands:
         type: string
     steps:
       - checkout
-      # command is to be replace
+      # command is to be replaced
 
   extract-and-load-co:
     parameters:
