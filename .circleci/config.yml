@@ -124,7 +124,7 @@ commands:
           notify-text: "Compiling project and checkpointing..."
       - run:
           name: Run dbt compile
-          command: cd dw && dbt compile <<parameters.compile-params>>
+          command: cd dw && dbt compile --select +vim_member_all <<parameters.compile-params>>
       - run:
           name: Run pre-commit
           command: cd dw && pre-commit run --all-files
@@ -245,25 +245,26 @@ jobs: #-jb
             << pipeline.parameters.dbt-metadata-vars >>,
             object_identifier_override: << pipeline.id >> | << pipeline.number >>
             }'
-      - log-pipeline-action-co:
-          run-params: >
-            --args '{object_type: meltano_project, event_name: log_pipeline_action, sequence_description: on_run_start}' 
-            --vars '{ 
-            << pipeline.parameters.dbt-metadata-vars >>,
-            object_identifier_override: dw-meltano
-            }'
-      - extract-and-load-co:
-          run-params: ""
-      - log-pipeline-action-co:
-          run-params: >
-            --args '{object_type: meltano_project, event_name: log_pipeline_action, sequence_description: on_run_end}' 
-            --vars '{ 
-            << pipeline.parameters.dbt-metadata-vars >>,
-            object_identifier_override: dw-meltano
-            }'
+      #- log-pipeline-action-co:
+          #run-params: >
+            #--args '{object_type: meltano_project, event_name: log_pipeline_action, sequence_description: on_run_start}' 
+            #--vars '{ 
+            #<< pipeline.parameters.dbt-metadata-vars >>,
+            #object_identifier_override: dw-meltano
+            #}'
+      #- extract-and-load-co:
+          #run-params: ""
+      #- log-pipeline-action-co:
+          #run-params: >
+            #--args '{object_type: meltano_project, event_name: log_pipeline_action, sequence_description: on_run_end}' 
+            #--vars '{ 
+            #<< pipeline.parameters.dbt-metadata-vars >>,
+            #object_identifier_override: dw-meltano
+            #}'
       - build-dbt-co:
           build-params: >
-            --exclude tag:demo tag:pit 
+            --exclude tag:demo tag:pit
+            --select +vim_member_all 
             --vars '{ 
             << pipeline.parameters.dbt-metadata-vars >>
             }'
