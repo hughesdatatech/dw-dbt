@@ -9,7 +9,7 @@ split_members as (
 
 ),
 
-final as (
+all_members as (
 
     select
         {%- for column in var('us_softball_league_metadata') %}
@@ -18,28 +18,37 @@ final as (
     from 
         split_members
 
+),
+
+final as (
+
+    select
+        {#
+            TO DO: leverage macros so that metadata and column names are more auto-generated.
+        #}
+        'default' as rv_hh_us_softball_league__members_tenant_key,
+        'ref_hh_us_softball_league__members.tsv' as rv_hh_us_softball_league__members_rec_source,
+        {{ build_job_id(invocation_id, 'rv_hh_us_softball_league__members') }},
+        'circleci' as rv_hh_us_softball_league__members_job_user_id,
+        'default' as rv_hh_us_softball_league__members_jira_task_key,
+        {{ build_loaded_at(alias='null') }}  as rv_hh_us_softball_league__members_extracted_at,
+        {{ build_loaded_at(alias='null') }} as rv_hh_us_softball_league__members_loaded_at,
+        cast(sha2(nvl(trim(cast(id as varchar)), ''), 256) as varbinary(64)) as rv_hh_us_softball_league__members_hd,
+        id,
+        name,
+        date_of_birth,
+        company_id,
+        last_active,
+        score,
+        date_from_parts(joined_league, 1, 1) as joined_league,
+        us_state
+    from 
+        all_members
+
 )
 
 select
-    {#
-        TO DO: leverage macros so that metadata and column names are more auto-generated.
-    #}
-    'default' as rv_hh_us_softball_league__members_tenant_key,
-    cast(sha2(nvl(trim(cast(id as varchar)), ''), 256) as varbinary(64)) as rv_hh_us_softball_league__members_hk,
-    'ref_hh_us_softball_league__members.csv' as rv_hh_us_softball_league__members_rec_source,
-    {{ build_job_id(invocation_id, 'rv_hh_us_softball_league__members') }},
-    'circleci' as rv_hh_us_softball_league__members_job_user_id,
-    'default' as rv_hh_us_softball_league__members_jira_task_key,
-    {{ build_loaded_at(alias='null') }}  as rv_hh_us_softball_league__members_extracted_at,
-    {{ build_loaded_at(alias='null') }} as rv_hh_us_softball_league__members_loaded_at,
-    cast(sha2(nvl(trim(cast(id as varchar)), ''), 256) as varbinary(64)) as rv_hh_us_softball_league__members_hd,
-    id,
-    name,
-    date_of_birth,
-    company_id,
-    last_active,
-    score,
-    date_from_parts(joined_league, 1, 1) as joined_league,
-    us_state
+    cast(sha2(nvl(trim(cast(id as varchar)), '') || rv_hh_us_softball_league__members_rec_source, 256) as varbinary(64)) as rv_hh_us_softball_league__members_hk,
+    *
 from 
     final

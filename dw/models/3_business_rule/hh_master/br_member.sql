@@ -114,6 +114,11 @@ final as (
         combined.state_code
     from
         combined 
+        {#
+            TO DO: Company data should ideally live in master, conformed dimension / data mart.
+            This model should reference the company data from there, not from the stage model.
+            The stage model is being used here for quick demo purposes only.
+        #}
         left join {{ ref('stg_hh_master__companies') }} as comp 
             on combined.company_id = comp.id
     where true

@@ -5,3 +5,16 @@ models:
   - name: im_opioid_stay_hist
   - name: im_opioid_stay_pit
   - name: vim_opioid_stay
+
+  - name: im_member
+  - name: im_member_exception
+  - name: vim_member_all
+    tests:
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: ref('ref_hh_unity_golf_club__members')
+          row_condition: "member_rec_source = 'ref_hh_unity_golf_club__members.csv'"
+          compare_row_condition: "true"
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: ref('ref_hh_us_softball_league__members')
+          row_condition: "member_rec_source = 'ref_hh_us_softball_league__members.tsv'"
+          compare_row_condition: "true"

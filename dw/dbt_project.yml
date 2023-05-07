@@ -247,6 +247,11 @@ vars:
       col_6: ['int', 'joined_league']
       col_7: ['varchar(50)', 'us_state']
 
+  member_exception_rules:
+      rule_0: 'joined_at < birth_date'
+      rule_1: 'last_active_at < birth_date'
+      rule_2: 'last_active_at < joined_at'
+
   stg_pagov__model_config:
       pagov__opioid_stays: 
         track_key_deletes: false 
