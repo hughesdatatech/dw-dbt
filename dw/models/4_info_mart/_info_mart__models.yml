@@ -7,8 +7,32 @@ models:
   - name: vim_opioid_stay
 
   - name: im_member
+    description: User-facing information mart where each record represents a unique member.
+                Members are uniquely identifed by their member_hk which is a combination of 
+                their id and the source system from which they came. This information mart
+                only contains members who have passed all validation rules, i.e.
+                no exceptions have been identifed.
+    columns:
+    - name: member_hk
+      tests:
+        - unique
+
   - name: im_member_exception
+    description: User-facing information mart where each record represents a unique member.
+                This information mart is at the same level of granularity as im_member with
+                the difference being that it only contains members who have NOT passed all
+                validation rules, i.e. exceptions have been identifed.
+    columns:
+      - name: member_hk
+        tests:
+          - unique
+
   - name: vim_member_all
+    description: User-facing information mart where each record represents a unique member.
+                This information mart is at the same level of granularity as im_member and
+                im_member_exception. It is a view that combines data from both of those 
+                information marts to provide the complete member data set, i.e.
+                non-exceptional and exceptional records.
     tests:
       - dbt_expectations.expect_table_row_count_to_equal_other_table:
           compare_model: ref('ref_hh_unity_golf_club__members')
@@ -18,3 +42,7 @@ models:
           compare_model: ref('ref_hh_us_softball_league__members')
           row_condition: "member_rec_source = 'ref_hh_us_softball_league__members.tsv'"
           compare_row_condition: "true"
+    columns:
+    - name: member_hk
+      tests:
+        - unique

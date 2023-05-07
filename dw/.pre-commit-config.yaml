@@ -2,13 +2,11 @@ repos:
 - repo: https://github.com/dbt-checkpoint/dbt-checkpoint
   rev: v1.0.0
   hooks:
-  #- id: dbt-clean
-  #- id: dbt-docs-generate
-  #- id: check-model-has-tests
-    #name: Check that all models have tests
-    #args: ["--manifest", "dw/target/manifest.json", "--test-cnt", "1", "--"]
-    #files: ^dw/models/3_business_rule/pagov_api/pagov/opioid_stay/
   - id: check-model-has-tests-by-name
-    name: Check that all models have tests
+    name: Check that user-facing information marts have unique tests
     args: ["--manifest", "dw/target/manifest.json", "--tests", "unique=1", "--"]
-    files: ^dw/models/3_business_rule/pagov_api/pagov/opioid_stay/
+    files: ^dw/models/4_info_mart/hh_master/
+  - id: check-model-has-description
+    name: Check that user-facing information marts have descriptions
+    args: ["--manifest", "dw/target/manifest.json"]
+    files: ^dw/models/4_info_mart/hh_master/
