@@ -62,11 +62,11 @@ latest_key_stat as (
     
         'rv_pagov__opioid_stays' as rv_pagov__opioid_stays_rec_source,
     
-    '7aff3c53-f4b7-4d61-b4bf-0d43d20f97b0' as rv_pagov__opioid_stays_job_id,
+    '10828c61-cb2d-4d4b-8dd3-2a13bac161f7' as rv_pagov__opioid_stays_job_id,
     'circleci' as rv_pagov__opioid_stays_job_user_id,
     'default' as rv_pagov__opioid_stays_jira_task_key,
-    to_char(timestamp '2023-05-07 19:52:53.314653+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp  as rv_pagov__opioid_stays_extracted_at,
-    to_char(timestamp '2023-05-07 19:52:53.314653+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp rv_pagov__opioid_stays_loaded_at,
+    to_char(timestamp '2023-05-07 19:59:41.933416+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp  as rv_pagov__opioid_stays_extracted_at,
+    to_char(timestamp '2023-05-07 19:59:41.933416+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp rv_pagov__opioid_stays_loaded_at,
             latest_rv.rv_pagov__opioid_stays_hk as rv___hk,
             latest_rv.dbt_scd_id as rv_dbt_scd_id,
             case

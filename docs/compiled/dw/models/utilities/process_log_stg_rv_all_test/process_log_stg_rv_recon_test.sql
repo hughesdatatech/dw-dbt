@@ -80,7 +80,7 @@ as (
   from dw_dev.dbt_steve.rv_pagov__opioid_stays
  )
  select 
-  '7aff3c53-f4b7-4d61-b4bf-0d43d20f97b0' as job_id,
+  '10828c61-cb2d-4d4b-8dd3-2a13bac161f7' as job_id,
   'stg_pagov__opioid_stays' as stg_table_name,
   'rv_pagov__opioid_stays' as tgt_table_name,
   unique_key_stg_columns,
@@ -90,7 +90,7 @@ as (
   unique_key_tgt_not_loaded,
   unique_key_tgt_loaded,
   unique_key_tgt_total,
-  to_char(timestamp '2023-05-07 19:52:53.314653+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp  as loaded_at,
+  to_char(timestamp '2023-05-07 19:59:41.933416+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp  as loaded_at,
   to_char(sysdate(), 'YYYY-MM-DD HH24:MI:SS')::timestamp inserted_at
 from 
   SAT_UKEY_SGTG_stg_pagov__opioid_stays, 
