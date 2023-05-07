@@ -103,15 +103,15 @@ commands:
       - run:
           name: Run dbt deps
           command: cd dw && dbt deps
-      - run:
-          name: Install meltano
-          command: pipx install "meltano"
-      - run:
-          name: Install rest api extractor
-          command: cd dw-meltano/dw-ownbackup && meltano install extractor tap-rest-api-msdk
-      - run:
-          name: Install snowflake loader
-          command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
+      #- run:
+          #name: Install meltano
+          #command: pipx install "meltano"
+      #- run:
+          #name: Install rest api extractor
+          #command: cd dw-meltano/dw-ownbackup && meltano install extractor tap-rest-api-msdk
+      #- run:
+          #name: Install snowflake loader
+          #command: cd dw-meltano/dw-ownbackup && meltano add loader target-snowflake
 
   compile-dbt-co:
     parameters:
