@@ -31,12 +31,12 @@ SAT_KEY_DUPES_stg_pagov__opioid_stays as (
     )
 )
 select
-    'dcb601de-b39f-4733-a1b9-29ff8c82de68' as job_id,
+    '587a075a-8880-4f2d-b81d-a019d9ffd952' as job_id,
     'stg_pagov__opioid_stays' as stg_table_name,
     'rv_pagov__opioid_stays' as tgt_table_name,
     key_dupes,
     key_dupes_tgt_columns,
-    to_char(timestamp '2023-05-07 20:19:17.787862+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp  as loaded_at,
+    to_char(timestamp '2023-05-08 20:34:55.122195+00:00', 'YYYY-MM-DD HH24:MI:SS')::timestamp  as loaded_at,
     to_char(sysdate(), 'YYYY-MM-DD HH24:MI:SS')::timestamp inserted_at
 from 
     SAT_KEY_DUPES_stg_pagov__opioid_stays
