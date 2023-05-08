@@ -8,7 +8,7 @@ orbs:
 parameters: #-pp
   manual-trigger-pp:
     type: string
-    default: ""
+    default: "sf-runner-elt"
   dbt-test-vars:
     type: string
     default: "--vars 'test_row_limit: 10'"
